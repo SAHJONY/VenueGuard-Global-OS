@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import health from "../api/health.js";
 import summary from "../api/summary.js";
 import events from "../api/events.js";
+import ecosystem from "../api/ecosystem.js";
 
 function invoke(handler, method = "GET") {
   const result = { statusCode: 200, payload: null };
@@ -27,4 +28,16 @@ test("Vercel dashboard functions return stable data", () => {
 
 test("Vercel functions reject non-GET methods", () => {
   assert.equal(invoke(summary, "POST").statusCode, 405);
+  assert.equal(invoke(ecosystem, "POST").statusCode, 405);
+});
+
+test("ecosystem API exposes every core operating domain", () => {
+  const payload = invoke(ecosystem).payload;
+  assert.equal(payload.venue.name, "VELVET TH");
+  assert.equal(payload.modules.length, 6);
+  assert.ok(payload.cashflow.length >= 6);
+  assert.ok(payload.inventory.every(item => "variance" in item));
+  assert.ok(payload.workforce.every(employee => "tips" in employee && "due" in employee));
+  assert.ok(payload.ticketing.sold <= payload.ticketing.capacity);
+  assert.ok(payload.artists.every(artist => artist.contract && artist.settlement));
 });

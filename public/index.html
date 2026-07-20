@@ -1,39 +1,25 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VenueGuard — Owner Command Center</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="VenueGuard Global OS owner command center">
+  <title>VenueGuard — Global Venue OS</title><link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <aside class="rail">
-    <div class="mark">VG</div>
-    <nav aria-label="Primary">
-      <button class="active" aria-label="Overview">⌂</button><button aria-label="Sales">$</button>
-      <button aria-label="Inventory">◇</button><button aria-label="People">◎</button><button aria-label="Events">▣</button>
-    </nav>
-    <div class="avatar">JG</div>
-  </aside>
+  <aside class="rail"><div class="mark">VG</div><nav id="nav" aria-label="Workspace"></nav><div class="avatar">JG</div></aside>
   <main>
-    <header>
-      <div><p class="eyebrow">OWNER COMMAND CENTER</p><h1>VELVET TH</h1><p class="muted">Live operating picture · Chicago time</p></div>
-      <div class="status"><span></span> Systems operational</div>
-    </header>
-
-    <section class="hero">
-      <div><p class="label">TONIGHT'S NET CONTROLLED REVENUE</p><strong id="sales">—</strong><p class="positive">100% transaction attribution</p></div>
-      <div class="hero-grid"><article><small>Tips tracked</small><b id="tips">—</b></article><article><small>Open alerts</small><b id="alerts">—</b></article></div>
+    <header><div><p class="eyebrow">VENUEGUARD GLOBAL OS · OWNER ACCESS</p><h1 id="venue">VELVET TH</h1><p class="muted">One operating system for venues, arenas, restaurants and live entertainment</p></div><div class="status"><span></span> Systems operational</div></header>
+    <div class="demo-banner"><strong>DEMO ENVIRONMENT</strong><span>Representative data only · no live money movement</span></div>
+    <section class="view active" data-view="overview">
+      <div class="hero"><div><p class="label">TONIGHT'S NET CONTROLLED REVENUE</p><strong id="sales">—</strong><p class="positive">100% transaction attribution</p></div><div class="hero-grid"><article><small>Tips tracked</small><b id="tips">—</b></article><article><small>Open alerts</small><b id="alerts">—</b></article></div></div>
+      <div class="module-grid" id="modules"></div>
+      <section class="panel"><div class="section-head"><div><p class="label">IMMUTABLE EVENT STREAM</p><h2>Recent activity</h2></div><button class="outline" data-action="export">Export audit</button></div><div id="events"></div></section>
     </section>
-
-    <section class="cards">
-      <article><p class="label">CASH POSITION</p><h2>Balanced</h2><p>Processor and bank reconciliation ready.</p><span class="pill good">No unexplained break</span></article>
-      <article><p class="label">INVENTORY CONTROL</p><h2 id="variance">—</h2><p>Item-to-cash variance under review.</p><span class="pill warn">Evidence required</span></article>
-      <article><p class="label">OWNER AUTHORITY</p><h2>Protected</h2><p>Critical actions require verified owner approval.</p><span class="pill good">MFA enforced</span></article>
-    </section>
-
-    <section class="activity"><div class="section-head"><div><p class="label">IMMUTABLE EVENT STREAM</p><h2>Recent activity</h2></div><button class="outline">Export audit</button></div><div id="events"></div></section>
+    <section class="view" data-view="cash"><div class="page-title"><p class="label">TOTAL CASHFLOW</p><h2>Every dollar explained</h2></div><div class="metric-strip" id="cashflow"></div><section class="panel"><h3>Close controls</h3><div id="controls" class="control-list"></div></section></section>
+    <section class="view" data-view="inventory"><div class="page-title"><p class="label">SUPPLIER → CUSTOMER → CASH</p><h2>Inventory trace</h2></div><section class="panel table-wrap"><table><thead><tr><th>SKU</th><th>Item</th><th>Received</th><th>Consumed</th><th>Sold</th><th>Variance</th><th>Status</th></tr></thead><tbody id="inventory"></tbody></table></section></section>
+    <section class="view" data-view="workforce"><div class="page-title"><p class="label">EMPLOYEE ACCOUNTABILITY</p><h2>Sales, tips and payroll due</h2></div><section class="panel table-wrap"><table><thead><tr><th>Employee</th><th>Role</th><th>Attributed sales</th><th>Tips</th><th>Amount due</th></tr></thead><tbody id="workforce"></tbody></table></section></section>
+    <section class="view" data-view="tickets"><div class="page-title"><p class="label">DIRECT-TO-FAN COMMERCE</p><h2>Tickets & reservations</h2></div><div class="ticket-card" id="ticketing"></div></section>
+    <section class="view" data-view="artists"><div class="page-title"><p class="label">ARTIST-FIRST TOURING</p><h2>Offers, contracts and settlements</h2></div><div class="artist-grid" id="artists"></div></section>
   </main>
-  <script type="module" src="app.js"></script>
-</body>
-</html>
+  <div id="toast" role="status" aria-live="polite"></div><script type="module" src="app.js"></script>
+</body></html>
