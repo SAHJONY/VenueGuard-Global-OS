@@ -6,6 +6,7 @@ import events from "../api/events.js";
 import ecosystem from "../api/ecosystem.js";
 import platform from "../api/platform.js";
 import catalog from "../api/catalog.js";
+import { readFile } from "node:fs/promises";
 
 function invoke(handler, method = "GET") {
   const result = { statusCode: 200, payload: null };
@@ -41,6 +42,13 @@ test("global catalog supports multiple venue classes, currencies and locales", (
   assert.ok(new Set(payload.venues.map(venue => venue.currency)).size >= 3);
   assert.deepEqual(payload.locales.map(locale => locale.id), ["en-US", "es-US"]);
   assert.equal(payload.onboarding.length, 7);
+});
+
+test("commercial UI exposes platform plans and onboarding", async () => {
+  const [html, script] = await Promise.all([readFile(new URL("../public/index.html", import.meta.url), "utf8"), readFile(new URL("../public/app.js", import.meta.url), "utf8")]);
+  assert.match(html, /data-view="platform"/);
+  assert.match(script, /platform\.plans/);
+  assert.match(script, /catalog\.onboarding/);
 });
 
 test("platform API advertises global venues, portals and safe readiness", () => {
