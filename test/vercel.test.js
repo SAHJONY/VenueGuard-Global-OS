@@ -10,6 +10,7 @@ import { readFile } from "node:fs/promises";
 import risk from "../api/risk.js";
 import supply from "../api/supply.js";
 import trace from "../api/trace.js";
+import integrations from "../api/integrations.js";
 
 function invoke(handler, method = "GET") {
   const result = { statusCode: 200, payload: null };
@@ -40,6 +41,7 @@ test("Vercel functions reject non-GET methods", () => {
   assert.equal(invoke(risk, "POST").statusCode, 405);
   assert.equal(invoke(supply, "POST").statusCode, 405);
   assert.equal(invoke(trace, "POST").statusCode, 405);
+  assert.equal(invoke(integrations, "POST").statusCode, 405);
 });
 
 test("risk API never grants model authority over funds", () => {
@@ -61,6 +63,13 @@ test("trace API is verified without claiming live providers", () => {
   assert.ok(payload.traces.every(item => item.verification.complete));
 });
 
+test("integration API redacts all secret names and values", () => {
+  const payload = invoke(integrations).payload;
+  assert.equal(payload.secretsExposed, false);
+  assert.equal(payload.safeByDefault, true);
+  assert.ok(Object.values(payload.integrations).every(value => !Object.hasOwn(value, "missing")));
+});
+
 test("global catalog supports multiple venue classes, currencies and locales", () => {
   const payload = invoke(catalog).payload;
   assert.ok(payload.venues.some(venue => venue.type === "ARENA"));
@@ -74,6 +83,7 @@ test("commercial UI exposes platform plans and onboarding", async () => {
   assert.match(html, /data-view="platform"/);
   assert.match(script, /platform\.plans/);
   assert.match(script, /catalog\.onboarding/);
+  assert.match(script, /integrations\.integrations/);
 });
 
 test("platform API advertises global venues, portals and safe readiness", () => {
