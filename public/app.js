@@ -5,10 +5,12 @@ const navItems = [["overview","Overview","⌂"],["cash","Cashflow","$"],["invent
 async function json(path) { const response = await fetch(path); if (!response.ok) throw new Error(`${path}: ${response.status}`); return response.json(); }
 
 try {
-  const [summary, events, ecosystem] = await Promise.all([json("/api/summary"), json("/api/events"), json("/api/ecosystem")]);
+  const [summary, events, ecosystem, catalog] = await Promise.all([json("/api/summary"), json("/api/events"), json("/api/ecosystem"), json("/api/catalog")]);
   document.querySelector("#venue").textContent = ecosystem.venue.name;
   const portalNames = { OWNER: "Owner", EMPLOYEE: "Employee", CUSTOMER: "Customer", ARTIST: "Artist" };
   document.querySelector("#portal-switch").innerHTML = Object.entries(portalNames).map(([id, label], index) => `<button class="${index ? "" : "active"}" data-portal="${id}">${label}</button>`).join("");
+  document.querySelector("#venue-select").innerHTML = catalog.venues.map(venue => `<option value="${venue.id}">${venue.name}</option>`).join("");
+  document.querySelector("#locale-select").innerHTML = catalog.locales.map(locale => `<option value="${locale.id}">${locale.label}</option>`).join("");
   document.querySelector("#sales").textContent = money.format(summary.grossSales - summary.refunds);
   document.querySelector("#tips").textContent = money.format(summary.tips);
   document.querySelector("#alerts").textContent = summary.openAlerts;
@@ -40,6 +42,10 @@ try {
       document.querySelector("#portal-privacy").textContent = portalId === "EMPLOYEE" ? "Employees can see only their own shifts, sales, tips and amounts due." : portalId === "CUSTOMER" ? "Customers can see only their own profile, reservations, tickets and purchases." : "Artists can see only their own offers, contracts, dates, merchandise and settlements.";
     }
   }
+  function selectVenue(id) { const venue = catalog.venues.find(item => item.id === id); document.querySelector("#venue").textContent = venue.name; document.querySelector("#venue-meta").textContent = `${venue.type.replaceAll("_", " ")} · ${venue.city}, ${venue.country} · ${venue.currency} · ${venue.status}`; }
+  function selectLocale(id) { const words = catalog.translations[id]; document.documentElement.lang = id.startsWith("es") ? "es" : "en"; document.querySelector("#demo-label").textContent = words.demo; document.querySelector("#operational-label").textContent = words.operational; const portal = document.querySelector("[data-portal].active")?.dataset.portal || "OWNER"; document.querySelector("#access-label").textContent = `${portal} ${words.access}`; }
+  document.querySelector("#venue-select").addEventListener("change", event => selectVenue(event.target.value));
+  document.querySelector("#locale-select").addEventListener("change", event => selectLocale(event.target.value));
   document.addEventListener("click", event => { const portal = event.target.closest("[data-portal]")?.dataset.portal; if (portal) showPortal(portal); const target = event.target.closest("[data-target]")?.dataset.target; if (target) show(target); const action = event.target.closest("[data-action]")?.dataset.action; if (action) { const toast = document.querySelector("#toast"); toast.textContent = action === "export" ? "Audit export prepared in demo mode" : action === "sell" ? "Customer sales portal is ready for provider connection" : action === "portal" ? "Demo action recorded — live provider not connected" : "Contract review requires verified owner approval"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); } });
 } catch (error) {
   document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="error">Data services are unavailable. ${error.message}</div>`);
