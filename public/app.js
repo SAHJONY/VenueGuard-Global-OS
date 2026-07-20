@@ -1,11 +1,11 @@
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
-const navItems = [["overview","Overview","⌂"],["cash","Cashflow","$"],["inventory","Inventory","◇"],["workforce","Workforce","◎"],["tickets","Tickets","▣"],["artists","Artists","★"]];
+const navItems = [["overview","Overview","⌂"],["cash","Cashflow","$"],["inventory","Inventory","◇"],["workforce","Workforce","◎"],["tickets","Tickets","▣"],["artists","Artists","★"],["platform","Platform","⚙"]];
 
 async function json(path) { const response = await fetch(path); if (!response.ok) throw new Error(`${path}: ${response.status}`); return response.json(); }
 
 try {
-  const [summary, events, ecosystem, catalog] = await Promise.all([json("/api/summary"), json("/api/events"), json("/api/ecosystem"), json("/api/catalog")]);
+  const [summary, events, ecosystem, catalog, platform] = await Promise.all([json("/api/summary"), json("/api/events"), json("/api/ecosystem"), json("/api/catalog"), json("/api/platform")]);
   document.querySelector("#venue").textContent = ecosystem.venue.name;
   const portalNames = { OWNER: "Owner", EMPLOYEE: "Employee", CUSTOMER: "Customer", ARTIST: "Artist" };
   document.querySelector("#portal-switch").innerHTML = Object.entries(portalNames).map(([id, label], index) => `<button class="${index ? "" : "active"}" data-portal="${id}">${label}</button>`).join("");
@@ -24,6 +24,9 @@ try {
   const ticket = ecosystem.ticketing, progress = Math.round(ticket.sold / ticket.capacity * 100);
   document.querySelector("#ticketing").innerHTML = `<div><p class="label">NEXT EVENT</p><h3>${ticket.event}</h3><strong>${ticket.sold} / ${ticket.capacity}</strong><div class="progress"><i style="width:${progress}%"></i></div><p>${progress}% sold · ${ticket.checkedIn} checked in · ${ticket.reservations} reservations</p></div><div class="ticket-revenue"><small>Direct ticket revenue</small><b>${money.format(ticket.revenue)}</b><button data-action="sell">Open sales portal</button></div>`;
   document.querySelector("#artists").innerHTML = ecosystem.artists.map(row => `<article><p class="label">${row.date}</p><h3>${row.artist}</h3><strong>${money.format(row.tariff)}</strong><p>Contract: ${row.contract}</p><p>Settlement: ${row.settlement}</p><button class="outline" data-action="contract">Review contract</button></article>`).join("");
+  document.querySelector("#plans").innerHTML = Object.entries(platform.plans).map(([name, plan]) => `<article><p class="label">${name}</p><h3>${plan.monthlyUsd ? money.format(plan.monthlyUsd) + " / month" : "Custom pricing"}</h3><p>${plan.venues || "Unlimited"} venue${plan.venues === 1 ? "" : "s"} · ${plan.includedUsers || "Unlimited"} users</p><ul>${plan.features.map(feature => `<li>${feature === "*" ? "All enterprise capabilities" : feature}</li>`).join("")}</ul><button data-action="subscribe">Select ${name}</button></article>`).join("");
+  document.querySelector("#onboarding").innerHTML = catalog.onboarding.map((step, index) => `<div><span>${index + 1}</span><strong>${step}</strong><small>${index === 0 ? "Ready to begin" : "Pending"}</small></div>`).join("");
+  document.querySelector("#readiness").innerHTML = Object.entries(platform.readiness).map(([service, state]) => `<div><span>${service.replaceAll(/([A-Z])/g, " $1")}</span><strong class="${state.includes("required") || state.includes("planned") ? "pending" : "implemented"}">${state.replaceAll("-", " ")}</strong></div>`).join("");
 
   function show(target) { document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.dataset.view === target)); document.querySelectorAll("#nav button").forEach(button => button.classList.toggle("active", button.dataset.target === target)); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function showPortal(portalId) {
@@ -46,7 +49,7 @@ try {
   function selectLocale(id) { const words = catalog.translations[id]; document.documentElement.lang = id.startsWith("es") ? "es" : "en"; document.querySelector("#demo-label").textContent = words.demo; document.querySelector("#operational-label").textContent = words.operational; const portal = document.querySelector("[data-portal].active")?.dataset.portal || "OWNER"; document.querySelector("#access-label").textContent = `${portal} ${words.access}`; }
   document.querySelector("#venue-select").addEventListener("change", event => selectVenue(event.target.value));
   document.querySelector("#locale-select").addEventListener("change", event => selectLocale(event.target.value));
-  document.addEventListener("click", event => { const portal = event.target.closest("[data-portal]")?.dataset.portal; if (portal) showPortal(portal); const target = event.target.closest("[data-target]")?.dataset.target; if (target) show(target); const action = event.target.closest("[data-action]")?.dataset.action; if (action) { const toast = document.querySelector("#toast"); toast.textContent = action === "export" ? "Audit export prepared in demo mode" : action === "sell" ? "Customer sales portal is ready for provider connection" : action === "portal" ? "Demo action recorded — live provider not connected" : "Contract review requires verified owner approval"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); } });
+  document.addEventListener("click", event => { const portal = event.target.closest("[data-portal]")?.dataset.portal; if (portal) showPortal(portal); const target = event.target.closest("[data-target]")?.dataset.target; if (target) show(target); const action = event.target.closest("[data-action]")?.dataset.action; if (action) { const toast = document.querySelector("#toast"); toast.textContent = action === "export" ? "Audit export prepared in demo mode" : action === "sell" ? "Customer sales portal is ready for provider connection" : action === "portal" ? "Demo action recorded — live provider not connected" : action === "subscribe" ? "Plan selected in demo mode — billing provider required" : "Contract review requires verified owner approval"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); } });
 } catch (error) {
   document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="error">Data services are unavailable. ${error.message}</div>`);
 }
