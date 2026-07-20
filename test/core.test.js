@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment } from "../packages/core/src/index.js";
+import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment, verifyTrace } from "../packages/core/src/index.js";
 
 test("tenant isolation blocks cross-tenant access", () => {
   const actor = { verified: true, role: Role.OWNER, tenantId: "one" };
@@ -52,4 +52,12 @@ test("replenishment rounds shortages to case sizes and requires owner", () => {
   assert.equal(result.recommendedQuantity, 12);
   assert.equal(result.decision, "OWNER_APPROVAL_REQUIRED");
   assert.equal(recommendReplenishment({ onHand: 20, dailyUsage: 2, leadTimeDays: 2, caseSize: 6 }).decision, "NO_ORDER");
+});
+
+test("trace requires supplier, consumption, sale and reconciliation", () => {
+  const traceId = "trace-1";
+  const complete = verifyTrace(["SUPPLIER_RECEIPT", "ITEM_CONSUMED", "SALE_ATTRIBUTED", "PAYMENT_RECONCILED"].map(type => ({ traceId, type })));
+  assert.equal(complete.status, "TRACE_VERIFIED");
+  const incomplete = verifyTrace(["SUPPLIER_RECEIPT", "ITEM_CONSUMED", "SALE_ATTRIBUTED", "NOTE"].map(type => ({ traceId, type })));
+  assert.deepEqual(incomplete.missing, ["PAYMENT_RECONCILED"]);
 });
