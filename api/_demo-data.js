@@ -53,5 +53,11 @@ export const ecosystem = Object.freeze({
     "No inventory adjustment without reason and evidence",
     "Ticket can be checked in only once",
     "Artist settlement cannot exceed approved contract"
-  ]
+  ],
+  portals: {
+    OWNER: { title: "Owner Command Center", subtitle: "Unrestricted tenant authority", stats: [["Controlled revenue", "$14,820"],["Open alerts", "1"],["Venues", "1"]], actions: ["Approve high-value refund", "Lock payout destination", "Export immutable audit"] },
+    EMPLOYEE: { title: "Employee Shift Wallet", subtitle: "Only your own shift, sales, tips and amounts due", stats: [["My attributed sales", "$2,840"],["My tips", "$426"],["Amount due", "$426"]], actions: ["Scan sale", "View shift", "Request tip payout"] },
+    CUSTOMER: { title: "Guest Experience", subtitle: "Discover, reserve and buy directly from the venue", stats: [["Upcoming tickets", "2"],["Reservations", "1"],["Reward balance", "1,240"]], actions: ["Buy tickets", "Reserve a table", "View my passes"] },
+    ARTIST: { title: "Artist Tour Desk", subtitle: "Control offers, dates, merchandise and settlements", stats: [["Active offers", "3"],["Confirmed shows", "1"],["Pending settlement", "$4,200"]], actions: ["Submit tariff", "Propose show date", "Review contract"] }
+  }
 });
