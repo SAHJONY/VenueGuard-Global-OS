@@ -4,6 +4,7 @@ import health from "../api/health.js";
 import summary from "../api/summary.js";
 import events from "../api/events.js";
 import ecosystem from "../api/ecosystem.js";
+import platform from "../api/platform.js";
 
 function invoke(handler, method = "GET") {
   const result = { statusCode: 200, payload: null };
@@ -29,6 +30,15 @@ test("Vercel dashboard functions return stable data", () => {
 test("Vercel functions reject non-GET methods", () => {
   assert.equal(invoke(summary, "POST").statusCode, 405);
   assert.equal(invoke(ecosystem, "POST").statusCode, 405);
+  assert.equal(invoke(platform, "POST").statusCode, 405);
+});
+
+test("platform API advertises global venues, portals and safe readiness", () => {
+  const payload = invoke(platform).payload;
+  assert.ok(payload.venueTypes.includes("STADIUM"));
+  assert.deepEqual(payload.portals, ["OWNER", "EMPLOYEE", "CUSTOMER", "ARTIST"]);
+  assert.equal(payload.plans.STARTER.monthlyUsd, 299);
+  assert.equal(payload.readiness.payments, "provider-required-live-charges-disabled");
 });
 
 test("ecosystem API exposes every core operating domain", () => {
