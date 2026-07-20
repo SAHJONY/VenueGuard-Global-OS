@@ -50,4 +50,6 @@ test("ecosystem API exposes every core operating domain", () => {
   assert.ok(payload.workforce.every(employee => "tips" in employee && "due" in employee));
   assert.ok(payload.ticketing.sold <= payload.ticketing.capacity);
   assert.ok(payload.artists.every(artist => artist.contract && artist.settlement));
+  assert.deepEqual(Object.keys(payload.portals), ["OWNER", "EMPLOYEE", "CUSTOMER", "ARTIST"]);
+  assert.ok(payload.portals.EMPLOYEE.subtitle.includes("Only your own"));
 });
