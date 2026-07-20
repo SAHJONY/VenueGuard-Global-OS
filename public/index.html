@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="VenueGuard Global OS owner command center">
-  <title>VenueGuard — Global Venue OS</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portals.css">
+  <title>VenueGuard — Global Venue OS</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portals.css"><link rel="stylesheet" href="global.css">
 </head>
 <body>
   <aside class="rail"><div class="mark">VG</div><nav id="nav" aria-label="Workspace"></nav><div class="avatar">JG</div></aside>
   <main>
-    <header><div><p class="eyebrow">VENUEGUARD GLOBAL OS · <span id="access-label">OWNER ACCESS</span></p><h1 id="venue">VELVET TH</h1><p class="muted">One operating system for venues, arenas, restaurants and live entertainment</p></div><div class="header-tools"><div class="portal-switch" id="portal-switch" aria-label="Demo portal selector"></div><div class="status"><span></span> Systems operational</div></div></header>
-    <div class="demo-banner"><strong>DEMO ENVIRONMENT</strong><span>Representative data only · no live money movement</span></div>
+    <header><div><p class="eyebrow">VENUEGUARD GLOBAL OS · <span id="access-label">OWNER ACCESS</span></p><div class="venue-line"><h1 id="venue">VELVET TH</h1><select id="venue-select" aria-label="Venue"></select></div><p class="muted" id="venue-meta">One operating system for venues, arenas, restaurants and live entertainment</p></div><div class="header-tools"><select id="locale-select" aria-label="Language"></select><div class="portal-switch" id="portal-switch" aria-label="Demo portal selector"></div><div class="status"><span></span><span id="operational-label">Systems operational</span></div></div></header>
+    <div class="demo-banner"><strong>DEMO ENVIRONMENT</strong><span id="demo-label">Representative data only · no live money movement</span></div>
     <section id="owner-workspace"><section class="view active" data-view="overview">
       <div class="hero"><div><p class="label">TONIGHT'S NET CONTROLLED REVENUE</p><strong id="sales">—</strong><p class="positive">100% transaction attribution</p></div><div class="hero-grid"><article><small>Tips tracked</small><b id="tips">—</b></article><article><small>Open alerts</small><b id="alerts">—</b></article></div></div>
       <div class="module-grid" id="modules"></div>
