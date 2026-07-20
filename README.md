@@ -30,3 +30,7 @@ The database schema is migration-ready but is not applied automatically. Live au
 payments, subscriptions, and contract signatures require selected providers, production
 credentials, webhook verification, and an operational security review. The application rejects
 live payment attempts until that configuration exists.
+
+Provider configuration is documented in `.env.example`. Real secrets belong only in the
+deployment platform's encrypted environment settings. `/api/integrations` exposes configuration
+state and missing-field counts, never secret names or values.
