@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="VenueGuard Global OS owner command center">
-  <title>VenueGuard — Global Venue OS</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portals.css"><link rel="stylesheet" href="global.css"><link rel="stylesheet" href="commercial.css"><link rel="stylesheet" href="risk.css"><link rel="stylesheet" href="supply.css">
+  <title>VenueGuard — Global Venue OS</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portals.css"><link rel="stylesheet" href="global.css"><link rel="stylesheet" href="commercial.css"><link rel="stylesheet" href="risk.css"><link rel="stylesheet" href="supply.css"><link rel="stylesheet" href="trace.css">
 </head>
 <body>
   <aside class="rail"><div class="mark">VG</div><nav id="nav" aria-label="Workspace"></nav><div class="avatar">JG</div></aside>
@@ -17,6 +17,7 @@
     </section>
     <section class="view" data-view="cash"><div class="page-title"><p class="label">TOTAL CASHFLOW</p><h2>Every dollar explained</h2></div><div class="metric-strip" id="cashflow"></div><section class="panel"><h3>Close controls</h3><div id="controls" class="control-list"></div></section></section>
     <section class="view" data-view="inventory"><div class="page-title"><p class="label">SUPPLIER → CUSTOMER → CASH</p><h2>Inventory trace</h2></div><section class="panel table-wrap"><table><thead><tr><th>SKU</th><th>Item</th><th>Received</th><th>Consumed</th><th>Sold</th><th>Variance</th><th>Status</th></tr></thead><tbody id="inventory"></tbody></table></section></section>
+    <section class="view" data-view="trace"><div class="page-title"><p class="label">SUPPLIER → CONSUMPTION → SALE → MONEY</p><h2>Scan-to-cash trace</h2></div><div class="trace-state">Scanner and payment connections are simulated in this environment.</div><div id="trace-list"></div></section>
     <section class="view" data-view="supply"><div class="page-title"><p class="label">SMART REPLENISHMENT</p><h2>Supplier purchase recommendations</h2></div><div class="supply-notice">Recommendations never become purchase orders without verified owner approval.</div><div class="supply-grid" id="supply-items"></div></section>
     <section class="view" data-view="workforce"><div class="page-title"><p class="label">EMPLOYEE ACCOUNTABILITY</p><h2>Sales, tips and payroll due</h2></div><section class="panel table-wrap"><table><thead><tr><th>Employee</th><th>Role</th><th>Attributed sales</th><th>Tips</th><th>Amount due</th></tr></thead><tbody id="workforce"></tbody></table></section></section>
     <section class="view" data-view="tickets"><div class="page-title"><p class="label">DIRECT-TO-FAN COMMERCE</p><h2>Tickets & reservations</h2></div><div class="ticket-card" id="ticketing"></div></section>

@@ -9,6 +9,7 @@ import catalog from "../api/catalog.js";
 import { readFile } from "node:fs/promises";
 import risk from "../api/risk.js";
 import supply from "../api/supply.js";
+import trace from "../api/trace.js";
 
 function invoke(handler, method = "GET") {
   const result = { statusCode: 200, payload: null };
@@ -38,6 +39,7 @@ test("Vercel functions reject non-GET methods", () => {
   assert.equal(invoke(catalog, "POST").statusCode, 405);
   assert.equal(invoke(risk, "POST").statusCode, 405);
   assert.equal(invoke(supply, "POST").statusCode, 405);
+  assert.equal(invoke(trace, "POST").statusCode, 405);
 });
 
 test("risk API never grants model authority over funds", () => {
@@ -50,6 +52,13 @@ test("supply API costs recommendations without auto ordering", () => {
   const payload = invoke(supply).payload;
   assert.equal(payload.autoOrdering, false);
   assert.ok(payload.items.every(item => item.estimatedCost >= 0));
+});
+
+test("trace API is verified without claiming live providers", () => {
+  const payload = invoke(trace).payload;
+  assert.equal(payload.scannerConnected, false);
+  assert.equal(payload.paymentProviderConnected, false);
+  assert.ok(payload.traces.every(item => item.verification.complete));
 });
 
 test("global catalog supports multiple venue classes, currencies and locales", () => {
