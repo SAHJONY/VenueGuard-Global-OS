@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan } from "../packages/core/src/index.js";
+import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk } from "../packages/core/src/index.js";
 
 test("tenant isolation blocks cross-tenant access", () => {
   const actor = { verified: true, role: Role.OWNER, tenantId: "one" };
@@ -37,4 +37,12 @@ test("ledger is append-only and idempotent", () => {
   assert.equal(first.id, duplicate.id);
   assert.equal(ledger.list({ tenantId: "one" }).length, 1);
   assert.equal(ledger.list({ tenantId: "two" }).length, 0);
+});
+
+test("risk controls hold critical signals for owner with explainable reasons", () => {
+  const result = evaluateRisk({ type: "UNATTRIBUTED_SALE", evidence: ["processor-event"] });
+  assert.equal(result.decision, "HOLD_FOR_OWNER");
+  assert.equal(result.ownerApproval, true);
+  assert.deepEqual(result.reasons, ["UNATTRIBUTED_SALE", "EVIDENCE_ATTACHED"]);
+  assert.equal(evaluateRisk({ type: "NORMAL_OPERATION" }).decision, "ALLOW");
 });

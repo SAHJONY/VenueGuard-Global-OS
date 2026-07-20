@@ -6,3 +6,4 @@ export { TicketingEngine } from "./ticketing.js";
 export { ArtistMarketplace } from "./artists.js";
 export { PaymentControl } from "./payments.js";
 export { VenueType, Portal, SubscriptionPlan, provisionTenant, portalFor } from "./platform.js";
+export { evaluateRisk, riskRules } from "./risk.js";

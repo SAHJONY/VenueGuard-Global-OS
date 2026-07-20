@@ -1,11 +1,11 @@
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
-const navItems = [["overview","Overview","⌂"],["cash","Cashflow","$"],["inventory","Inventory","◇"],["workforce","Workforce","◎"],["tickets","Tickets","▣"],["artists","Artists","★"],["platform","Platform","⚙"]];
+const navItems = [["overview","Overview","⌂"],["cash","Cashflow","$"],["inventory","Inventory","◇"],["workforce","Workforce","◎"],["tickets","Tickets","▣"],["artists","Artists","★"],["risk","Risk","!"],["platform","Platform","⚙"]];
 
 async function json(path) { const response = await fetch(path); if (!response.ok) throw new Error(`${path}: ${response.status}`); return response.json(); }
 
 try {
-  const [summary, events, ecosystem, catalog, platform] = await Promise.all([json("/api/summary"), json("/api/events"), json("/api/ecosystem"), json("/api/catalog"), json("/api/platform")]);
+  const [summary, events, ecosystem, catalog, platform, risk] = await Promise.all([json("/api/summary"), json("/api/events"), json("/api/ecosystem"), json("/api/catalog"), json("/api/platform"), json("/api/risk")]);
   document.querySelector("#venue").textContent = ecosystem.venue.name;
   const portalNames = { OWNER: "Owner", EMPLOYEE: "Employee", CUSTOMER: "Customer", ARTIST: "Artist" };
   document.querySelector("#portal-switch").innerHTML = Object.entries(portalNames).map(([id, label], index) => `<button class="${index ? "" : "active"}" data-portal="${id}">${label}</button>`).join("");
@@ -27,6 +27,8 @@ try {
   document.querySelector("#plans").innerHTML = Object.entries(platform.plans).map(([name, plan]) => `<article><p class="label">${name}</p><h3>${plan.monthlyUsd ? money.format(plan.monthlyUsd) + " / month" : "Custom pricing"}</h3><p>${plan.venues || "Unlimited"} venue${plan.venues === 1 ? "" : "s"} · ${plan.includedUsers || "Unlimited"} users</p><ul>${plan.features.map(feature => `<li>${feature === "*" ? "All enterprise capabilities" : feature}</li>`).join("")}</ul><button data-action="subscribe">Select ${name}</button></article>`).join("");
   document.querySelector("#onboarding").innerHTML = catalog.onboarding.map((step, index) => `<div><span>${index + 1}</span><strong>${step}</strong><small>${index === 0 ? "Ready to begin" : "Pending"}</small></div>`).join("");
   document.querySelector("#readiness").innerHTML = Object.entries(platform.readiness).map(([service, state]) => `<div><span>${service.replaceAll(/([A-Z])/g, " $1")}</span><strong class="${state.includes("required") || state.includes("planned") ? "pending" : "implemented"}">${state.replaceAll("-", " ")}</strong></div>`).join("");
+  document.querySelector("#risk-guarantee").textContent = risk.guarantee;
+  document.querySelector("#risk-alerts").innerHTML = risk.alerts.map(alert => `<article><div class="risk-head"><span class="pill ${alert.evaluation.severity === "CRITICAL" ? "critical" : "attention"}">${alert.evaluation.severity}</span><small>${alert.evaluation.decision}</small></div><h3>${alert.type.replaceAll("_", " ")}</h3><p>${alert.subject}</p><strong>${money.format(Math.abs(alert.amount))}</strong><div class="reasons">${alert.evaluation.reasons.map(reason => `<span>${reason.replaceAll("_", " ")}</span>`).join("")}</div></article>`).join("");
 
   function show(target) { document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.dataset.view === target)); document.querySelectorAll("#nav button").forEach(button => button.classList.toggle("active", button.dataset.target === target)); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function showPortal(portalId) {

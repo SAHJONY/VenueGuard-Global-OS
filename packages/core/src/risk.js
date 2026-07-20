@@ -1,0 +1,3 @@
+const rules = Object.freeze({ CASH_VARIANCE: "CRITICAL", INVENTORY_VARIANCE: "HIGH", REFUND_SPIKE: "HIGH", VOID_AFTER_CLOSE: "CRITICAL", UNATTRIBUTED_SALE: "CRITICAL" });
+export function evaluateRisk(signal) { const severity = rules[signal.type]; if (!severity) return Object.freeze({ decision: "ALLOW", severity: "INFO", ownerApproval: false, reasons: ["NO_CONTROL_RULE_MATCHED"] }); const evidence = signal.evidence || []; return Object.freeze({ decision: "HOLD_FOR_OWNER", severity, ownerApproval: true, reasons: [signal.type, evidence.length ? "EVIDENCE_ATTACHED" : "EVIDENCE_REQUIRED"], evidenceCount: evidence.length }); }
+export function riskRules() { return rules; }
