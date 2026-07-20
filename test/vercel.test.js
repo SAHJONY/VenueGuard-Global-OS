@@ -5,6 +5,7 @@ import summary from "../api/summary.js";
 import events from "../api/events.js";
 import ecosystem from "../api/ecosystem.js";
 import platform from "../api/platform.js";
+import catalog from "../api/catalog.js";
 
 function invoke(handler, method = "GET") {
   const result = { statusCode: 200, payload: null };
@@ -31,6 +32,15 @@ test("Vercel functions reject non-GET methods", () => {
   assert.equal(invoke(summary, "POST").statusCode, 405);
   assert.equal(invoke(ecosystem, "POST").statusCode, 405);
   assert.equal(invoke(platform, "POST").statusCode, 405);
+  assert.equal(invoke(catalog, "POST").statusCode, 405);
+});
+
+test("global catalog supports multiple venue classes, currencies and locales", () => {
+  const payload = invoke(catalog).payload;
+  assert.ok(payload.venues.some(venue => venue.type === "ARENA"));
+  assert.ok(new Set(payload.venues.map(venue => venue.currency)).size >= 3);
+  assert.deepEqual(payload.locales.map(locale => locale.id), ["en-US", "es-US"]);
+  assert.equal(payload.onboarding.length, 7);
 });
 
 test("platform API advertises global venues, portals and safe readiness", () => {
