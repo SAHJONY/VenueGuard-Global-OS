@@ -9,3 +9,4 @@ export { VenueType, Portal, SubscriptionPlan, provisionTenant, portalFor } from 
 export { evaluateRisk, riskRules } from "./risk.js";
 export { recommendReplenishment } from "./replenishment.js";
 export { verifyTrace } from "./traceability.js";
+export { Integration, integrationStatus, requireIntegration } from "./integrations.js";
