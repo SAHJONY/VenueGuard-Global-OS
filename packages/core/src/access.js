@@ -4,7 +4,8 @@ export const Role = Object.freeze({
   AUDITOR: "AUDITOR",
   EMPLOYEE: "EMPLOYEE",
   ARTIST: "ARTIST",
-  SUPPLIER: "SUPPLIER"
+  SUPPLIER: "SUPPLIER",
+  CUSTOMER: "CUSTOMER"
 });
 
 const permissions = {
@@ -13,7 +14,8 @@ const permissions = {
   AUDITOR: ["sales:read", "inventory:read", "ledger:read"],
   EMPLOYEE: ["sale:create", "tips:read:self", "shift:read:self"],
   ARTIST: ["booking:read:self", "earnings:read:self", "contract:sign:self"],
-  SUPPLIER: ["purchase-order:read:self", "delivery:update:self"]
+  SUPPLIER: ["purchase-order:read:self", "delivery:update:self"],
+  CUSTOMER: ["reservation:create:self", "ticket:buy:self", "ticket:read:self"]
 };
 
 export function can(actor, permission, tenantId) {

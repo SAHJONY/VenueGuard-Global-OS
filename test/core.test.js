@@ -1,11 +1,27 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OperationalLedger, Role, can, requireOwner } from "../packages/core/src/index.js";
+import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan } from "../packages/core/src/index.js";
 
 test("tenant isolation blocks cross-tenant access", () => {
   const actor = { verified: true, role: Role.OWNER, tenantId: "one" };
   assert.equal(can(actor, "sales:read", "one"), true);
   assert.equal(can(actor, "sales:read", "two"), false);
+});
+
+test("commercial tenants require identity and a valid subscription plan", () => {
+  const tenant = provisionTenant({ legalName: " Velvet TH LLC ", ownerId: "owner-1", plan: "GROWTH" });
+  assert.equal(tenant.legalName, "Velvet TH LLC");
+  assert.equal(tenant.status, "TRIAL");
+  assert.equal(SubscriptionPlan.GROWTH.venues, 5);
+  assert.throws(() => provisionTenant({ legalName: "Bad", ownerId: "owner-1", plan: "UNKNOWN" }));
+});
+
+test("verified identities are routed to isolated portals", () => {
+  assert.equal(portalFor({ verified: true, role: Role.OWNER }), "OWNER");
+  assert.equal(portalFor({ verified: true, role: Role.EMPLOYEE }), "EMPLOYEE");
+  assert.equal(portalFor({ verified: true, role: Role.CUSTOMER }), "CUSTOMER");
+  assert.equal(portalFor({ verified: true, role: Role.ARTIST }), "ARTIST");
+  assert.throws(() => portalFor({ verified: false, role: Role.OWNER }));
 });
 
 test("only a verified tenant owner passes the owner gate", () => {

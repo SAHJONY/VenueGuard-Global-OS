@@ -18,6 +18,15 @@ Open `http://localhost:3000`.
 - Append-only operational event ledger.
 - Owner-only critical action policy.
 - APIs for dashboard summary, events, and health.
+- Multi-venue SaaS catalog, subscription plans, and four isolated portal types.
+- PostgreSQL tenant schema with row-level security enabled by default.
 
 This release uses demonstration data. It does not move money or connect to a
 live payment processor.
+
+## Production boundaries
+
+The database schema is migration-ready but is not applied automatically. Live authentication,
+payments, subscriptions, and contract signatures require selected providers, production
+credentials, webhook verification, and an operational security review. The application rejects
+live payment attempts until that configuration exists.
