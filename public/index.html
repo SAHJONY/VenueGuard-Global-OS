@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VenueGuard — Owner Command Center</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <aside class="rail">
+    <div class="mark">VG</div>
+    <nav aria-label="Primary">
+      <button class="active" aria-label="Overview">⌂</button><button aria-label="Sales">$</button>
+      <button aria-label="Inventory">◇</button><button aria-label="People">◎</button><button aria-label="Events">▣</button>
+    </nav>
+    <div class="avatar">JG</div>
+  </aside>
+  <main>
+    <header>
+      <div><p class="eyebrow">OWNER COMMAND CENTER</p><h1>VELVET TH</h1><p class="muted">Live operating picture · Chicago time</p></div>
+      <div class="status"><span></span> Systems operational</div>
+    </header>
+
+    <section class="hero">
+      <div><p class="label">TONIGHT'S NET CONTROLLED REVENUE</p><strong id="sales">—</strong><p class="positive">100% transaction attribution</p></div>
+      <div class="hero-grid"><article><small>Tips tracked</small><b id="tips">—</b></article><article><small>Open alerts</small><b id="alerts">—</b></article></div>
+    </section>
+
+    <section class="cards">
+      <article><p class="label">CASH POSITION</p><h2>Balanced</h2><p>Processor and bank reconciliation ready.</p><span class="pill good">No unexplained break</span></article>
+      <article><p class="label">INVENTORY CONTROL</p><h2 id="variance">—</h2><p>Item-to-cash variance under review.</p><span class="pill warn">Evidence required</span></article>
+      <article><p class="label">OWNER AUTHORITY</p><h2>Protected</h2><p>Critical actions require verified owner approval.</p><span class="pill good">MFA enforced</span></article>
+    </section>
+
+    <section class="activity"><div class="section-head"><div><p class="label">IMMUTABLE EVENT STREAM</p><h2>Recent activity</h2></div><button class="outline">Export audit</button></div><div id="events"></div></section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
