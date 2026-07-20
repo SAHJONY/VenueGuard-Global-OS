@@ -61,3 +61,17 @@ export const ecosystem = Object.freeze({
     ARTIST: { title: "Artist Tour Desk", subtitle: "Control offers, dates, merchandise and settlements", stats: [["Active offers", "3"],["Confirmed shows", "1"],["Pending settlement", "$4,200"]], actions: ["Submit tariff", "Propose show date", "Review contract"] }
   }
 });
+
+export const globalCatalog = Object.freeze({
+  locales: [{ id: "en-US", label: "English" }, { id: "es-US", label: "Español" }],
+  venues: [
+    { id: "velvet-th", name: "VELVET TH", type: "NIGHTCLUB", city: "Chicago", country: "US", currency: "USD", timezone: "America/Chicago", status: "LIVE" },
+    { id: "arena-demo", name: "Global Arena Demo", type: "ARENA", city: "Mexico City", country: "MX", currency: "MXN", timezone: "America/Mexico_City", status: "ONBOARDING" },
+    { id: "restaurant-demo", name: "Velvet Dining Demo", type: "RESTAURANT", city: "Madrid", country: "ES", currency: "EUR", timezone: "Europe/Madrid", status: "ONBOARDING" }
+  ],
+  onboarding: ["Business identity", "Owner verification", "Venue configuration", "Payments and bank", "Inventory import", "Staff invitations", "Go-live review"],
+  translations: {
+    "en-US": { access: "ACCESS", operational: "Systems operational", demo: "Representative data only · no live money movement" },
+    "es-US": { access: "ACCESO", operational: "Sistemas operativos", demo: "Datos representativos · sin movimiento de dinero real" }
+  }
+});
