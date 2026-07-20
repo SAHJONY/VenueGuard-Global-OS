@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk } from "../packages/core/src/index.js";
+import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment } from "../packages/core/src/index.js";
 
 test("tenant isolation blocks cross-tenant access", () => {
   const actor = { verified: true, role: Role.OWNER, tenantId: "one" };
@@ -45,4 +45,11 @@ test("risk controls hold critical signals for owner with explainable reasons", (
   assert.equal(result.ownerApproval, true);
   assert.deepEqual(result.reasons, ["UNATTRIBUTED_SALE", "EVIDENCE_ATTACHED"]);
   assert.equal(evaluateRisk({ type: "NORMAL_OPERATION" }).decision, "ALLOW");
+});
+
+test("replenishment rounds shortages to case sizes and requires owner", () => {
+  const result = recommendReplenishment({ onHand: 5, reserved: 1, dailyUsage: 3, leadTimeDays: 2, safetyDays: 2, caseSize: 6 });
+  assert.equal(result.recommendedQuantity, 12);
+  assert.equal(result.decision, "OWNER_APPROVAL_REQUIRED");
+  assert.equal(recommendReplenishment({ onHand: 20, dailyUsage: 2, leadTimeDays: 2, caseSize: 6 }).decision, "NO_ORDER");
 });
