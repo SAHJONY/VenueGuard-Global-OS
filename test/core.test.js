@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment, verifyTrace } from "../packages/core/src/index.js";
+import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment, verifyTrace, integrationStatus, requireIntegration } from "../packages/core/src/index.js";
 
 test("tenant isolation blocks cross-tenant access", () => {
   const actor = { verified: true, role: Role.OWNER, tenantId: "one" };
@@ -60,4 +60,13 @@ test("trace requires supplier, consumption, sale and reconciliation", () => {
   assert.equal(complete.status, "TRACE_VERIFIED");
   const incomplete = verifyTrace(["SUPPLIER_RECEIPT", "ITEM_CONSUMED", "SALE_ATTRIBUTED", "NOTE"].map(type => ({ traceId, type })));
   assert.deepEqual(incomplete.missing, ["PAYMENT_RECONCILED"]);
+});
+
+test("integrations are blocked by default and require complete credentials", () => {
+  const empty = integrationStatus({});
+  assert.equal(empty.PAYMENTS.state, "BLOCKED");
+  assert.throws(() => requireIntegration("PAYMENTS", {}), /PAYMENTS_NOT_CONFIGURED/);
+  const configured = { PAYMENT_PROVIDER: "test", PAYMENT_SECRET_KEY: "secret", PAYMENT_WEBHOOK_SECRET: "webhook" };
+  assert.equal(integrationStatus(configured).PAYMENTS.state, "CONFIGURED");
+  assert.equal(requireIntegration("PAYMENTS", configured), true);
 });
