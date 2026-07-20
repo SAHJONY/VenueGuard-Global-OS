@@ -7,3 +7,4 @@ export { ArtistMarketplace } from "./artists.js";
 export { PaymentControl } from "./payments.js";
 export { VenueType, Portal, SubscriptionPlan, provisionTenant, portalFor } from "./platform.js";
 export { evaluateRisk, riskRules } from "./risk.js";
+export { recommendReplenishment } from "./replenishment.js";
