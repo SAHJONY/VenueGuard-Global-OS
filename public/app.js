@@ -7,6 +7,8 @@ async function json(path) { const response = await fetch(path); if (!response.ok
 try {
   const [summary, events, ecosystem] = await Promise.all([json("/api/summary"), json("/api/events"), json("/api/ecosystem")]);
   document.querySelector("#venue").textContent = ecosystem.venue.name;
+  const portalNames = { OWNER: "Owner", EMPLOYEE: "Employee", CUSTOMER: "Customer", ARTIST: "Artist" };
+  document.querySelector("#portal-switch").innerHTML = Object.entries(portalNames).map(([id, label], index) => `<button class="${index ? "" : "active"}" data-portal="${id}">${label}</button>`).join("");
   document.querySelector("#sales").textContent = money.format(summary.grossSales - summary.refunds);
   document.querySelector("#tips").textContent = money.format(summary.tips);
   document.querySelector("#alerts").textContent = summary.openAlerts;
@@ -22,7 +24,23 @@ try {
   document.querySelector("#artists").innerHTML = ecosystem.artists.map(row => `<article><p class="label">${row.date}</p><h3>${row.artist}</h3><strong>${money.format(row.tariff)}</strong><p>Contract: ${row.contract}</p><p>Settlement: ${row.settlement}</p><button class="outline" data-action="contract">Review contract</button></article>`).join("");
 
   function show(target) { document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.dataset.view === target)); document.querySelectorAll("#nav button").forEach(button => button.classList.toggle("active", button.dataset.target === target)); window.scrollTo({ top: 0, behavior: "smooth" }); }
-  document.addEventListener("click", event => { const target = event.target.closest("[data-target]")?.dataset.target; if (target) show(target); const action = event.target.closest("[data-action]")?.dataset.action; if (action) { const toast = document.querySelector("#toast"); toast.textContent = action === "export" ? "Audit export prepared in demo mode" : action === "sell" ? "Customer sales portal is ready for provider connection" : "Contract review requires verified owner approval"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); } });
+  function showPortal(portalId) {
+    const owner = portalId === "OWNER", data = ecosystem.portals[portalId];
+    document.querySelector("#owner-workspace").hidden = !owner;
+    document.querySelector("#portal-workspace").hidden = owner;
+    document.querySelector(".rail").classList.toggle("portal-mode", !owner);
+    document.querySelector("#access-label").textContent = `${portalId} ACCESS`;
+    document.querySelectorAll("[data-portal]").forEach(button => button.classList.toggle("active", button.dataset.portal === portalId));
+    if (!owner) {
+      document.querySelector("#portal-kind").textContent = `${portalId} PORTAL`;
+      document.querySelector("#portal-title").textContent = data.title;
+      document.querySelector("#portal-subtitle").textContent = data.subtitle;
+      document.querySelector("#portal-stats").innerHTML = data.stats.map(([label, value]) => `<article><small>${label}</small><strong>${value}</strong></article>`).join("");
+      document.querySelector("#portal-actions").innerHTML = data.actions.map(action => `<button data-action="portal">${action}<span>→</span></button>`).join("");
+      document.querySelector("#portal-privacy").textContent = portalId === "EMPLOYEE" ? "Employees can see only their own shifts, sales, tips and amounts due." : portalId === "CUSTOMER" ? "Customers can see only their own profile, reservations, tickets and purchases." : "Artists can see only their own offers, contracts, dates, merchandise and settlements.";
+    }
+  }
+  document.addEventListener("click", event => { const portal = event.target.closest("[data-portal]")?.dataset.portal; if (portal) showPortal(portal); const target = event.target.closest("[data-target]")?.dataset.target; if (target) show(target); const action = event.target.closest("[data-action]")?.dataset.action; if (action) { const toast = document.querySelector("#toast"); toast.textContent = action === "export" ? "Audit export prepared in demo mode" : action === "sell" ? "Customer sales portal is ready for provider connection" : action === "portal" ? "Demo action recorded — live provider not connected" : "Contract review requires verified owner approval"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); } });
 } catch (error) {
   document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="error">Data services are unavailable. ${error.message}</div>`);
 }
