@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment, verifyTrace, integrationStatus, requireIntegration } from "../packages/core/src/index.js";
+import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment, verifyTrace, integrationStatus, requireIntegration, BrainTask, brainStatus, routeBrainTask, assertModelActionAllowed, runBrain } from "../packages/core/src/index.js";
 
 test("tenant isolation blocks cross-tenant access", () => {
   const actor = { verified: true, role: Role.OWNER, tenantId: "one" };
@@ -69,4 +69,47 @@ test("integrations are blocked by default and require complete credentials", () 
   const configured = { PAYMENT_PROVIDER: "test", PAYMENT_SECRET_KEY: "secret", PAYMENT_WEBHOOK_SECRET: "webhook" };
   assert.equal(integrationStatus(configured).PAYMENTS.state, "CONFIGURED");
   assert.equal(requireIntegration("PAYMENTS", configured), true);
+});
+
+test("multi-model brain is blocked without keys and exposes safe model defaults", () => {
+  const status = brainStatus({});
+  assert.equal(status.mode, "BLOCKED");
+  assert.equal(status.primary.model, "gpt-5.6-sol");
+  assert.equal(status.fallback.model, "claude-fable-5");
+  assert.equal(status.policy.financialAuthority, false);
+  assert.throws(() => routeBrainTask(BrainTask.OPERATIONS, {}), /AI_BRAIN_NOT_CONFIGURED/);
+});
+
+test("brain routes to OpenAI first and fails over to Anthropic", () => {
+  const both = routeBrainTask(BrainTask.RISK_REVIEW, { OPENAI_API_KEY: "test", ANTHROPIC_API_KEY: "test" });
+  assert.equal(both.provider, "OPENAI");
+  assert.equal(both.failover.provider, "ANTHROPIC");
+  const fallback = routeBrainTask(BrainTask.CODE, { ANTHROPIC_API_KEY: "test" });
+  assert.equal(fallback.provider, "ANTHROPIC");
+});
+
+test("no model can perform owner-only financial or contractual actions", () => {
+  assert.throws(() => assertModelActionAllowed("MOVE_MONEY"), /OWNER_APPROVAL_REQUIRED/);
+  assert.throws(() => assertModelActionAllowed("SIGN_CONTRACT"), /OWNER_APPROVAL_REQUIRED/);
+  assert.equal(assertModelActionAllowed("DRAFT_RECOMMENDATION"), true);
+});
+
+test("AI engine calls OpenAI Responses API without storing prompts", async () => {
+  let request;
+  const fetcher = async (url, options) => { request = { url, options }; return { ok: true, json: async () => ({ id: "resp-1", output_text: "recommendation" }) }; };
+  const result = await runBrain({ task: BrainTask.OPERATIONS, prompt: "Review operations", environment: { OPENAI_API_KEY: "test" }, fetcher });
+  assert.equal(result.provider, "OPENAI");
+  assert.equal(result.text, "recommendation");
+  assert.match(request.url, /openai\.com\/v1\/responses/);
+  assert.equal(JSON.parse(request.options.body).store, false);
+});
+
+test("AI engine fails over to Anthropic when the primary provider fails", async () => {
+  const fetcher = async (url) => url.includes("openai")
+    ? { ok: false, status: 503, json: async () => ({}) }
+    : { ok: true, json: async () => ({ id: "msg-1", content: [{ type: "text", text: "fallback" }] }) };
+  const result = await runBrain({ task: BrainTask.RISK_REVIEW, prompt: "Review risk", environment: { OPENAI_API_KEY: "test", ANTHROPIC_API_KEY: "test" }, fetcher });
+  assert.equal(result.provider, "ANTHROPIC");
+  assert.equal(result.failedOver, true);
+  assert.equal(result.text, "fallback");
 });
