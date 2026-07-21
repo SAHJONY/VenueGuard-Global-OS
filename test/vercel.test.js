@@ -11,6 +11,7 @@ import risk from "../api/risk.js";
 import supply from "../api/supply.js";
 import trace from "../api/trace.js";
 import integrations from "../api/integrations.js";
+import brain from "../api/brain.js";
 
 function invoke(handler, method = "GET") {
   const result = { statusCode: 200, payload: null };
@@ -42,6 +43,16 @@ test("Vercel functions reject non-GET methods", () => {
   assert.equal(invoke(supply, "POST").statusCode, 405);
   assert.equal(invoke(trace, "POST").statusCode, 405);
   assert.equal(invoke(integrations, "POST").statusCode, 405);
+  assert.equal(invoke(brain, "POST").statusCode, 405);
+});
+
+test("brain API is redacted and never grants financial authority", () => {
+  const payload = invoke(brain).payload;
+  assert.equal(payload.secretsExposed, false);
+  assert.equal(payload.policy.financialAuthority, false);
+  assert.equal(payload.policy.ownerApprovalRequired, true);
+  assert.equal(payload.primary.model, "gpt-5.6-sol");
+  assert.equal(payload.fallback.model, "claude-fable-5");
 });
 
 test("risk API never grants model authority over funds", () => {
