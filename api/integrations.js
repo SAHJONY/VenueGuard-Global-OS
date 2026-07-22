@@ -1,7 +1,24 @@
 import { integrationStatus } from "../packages/core/src/integrations.js";
+import { productionReadiness } from "../packages/core/src/readiness.js";
+import { neon } from "@neondatabase/serverless";
 
-export default function handler(request, response) {
+export default async function handler(request, response) {
   if (request.method !== "GET") return response.status(405).json({ error: "method not allowed" });
+  if (request.query?.view === "readiness") {
+    const readiness = productionReadiness(process.env);
+    let databaseVerified = false;
+    if (readiness.checks.database.ready) {
+      try {
+        const sql = neon(process.env.VENUEGUARD_DATABASE_URL);
+        const rows = await sql`select current_user as role, rolbypassrls from pg_roles where rolname = current_user`;
+        databaseVerified = rows[0]?.role === "venueguard_app" && rows[0]?.rolbypassrls === false;
+      } catch {}
+    }
+    const checks = { ...readiness.checks, database: { ...readiness.checks.database, ready: databaseVerified, verified: databaseVerified } };
+    const blockers = Object.entries(checks).filter(([, value]) => !value.ready).map(([name]) => name);
+    const verified = { ...readiness, mode: blockers.length ? "PILOT_BLOCKED" : "PILOT_READY", checks, blockers, blockerCount: blockers.length };
+    return response.status(verified.mode === "PILOT_READY" ? 200 : 503).json(verified);
+  }
   const status = integrationStatus(process.env);
   return response.status(200).json({
     safeByDefault: true,

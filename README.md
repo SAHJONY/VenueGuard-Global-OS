@@ -50,3 +50,19 @@ The default primary model is `gpt-5.6-sol`; `claude-fable-5` is the default cros
 Provider configuration is documented in `.env.example`. Real secrets belong only in the
 deployment platform's encrypted environment settings. `/api/integrations` exposes configuration
 state and missing-field counts, never secret names or values.
+
+## Paid pilot gate
+
+`GET /api/readiness` is the fail-closed operational gate for a real paid pilot. It is routed through
+the consolidated integrations function to stay within deployment limits and returns `503`
+until durable storage, OIDC/JWKS authentication, enforced MFA, signed read-only ingestion,
+monitoring, backups, and restore evidence are configured. Signed POS events are accepted through
+`POST /api/ingest` only after a durable idempotent sink is configured; client-provided tenant IDs
+are ignored in favor of server-controlled scope.
+
+Database readiness performs a live query through `VENUEGUARD_DATABASE_URL` and requires the
+`venueguard_app` runtime role with `NOBYPASSRLS`. The integration-provided `DATABASE_URL` is
+reserved for reviewed migrations and never counts as application readiness.
+
+See [docs/production-pilot.md](docs/production-pilot.md) for the go-live, profit-evidence,
+incident-response, and rollback requirements. Passing tests alone does not authorize a pilot.

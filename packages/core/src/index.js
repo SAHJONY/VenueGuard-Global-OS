@@ -13,3 +13,5 @@ export { Integration, integrationStatus, requireIntegration } from "./integratio
 export { BrainProvider, BrainTask, brainStatus, routeBrainTask, assertModelActionAllowed } from "./brain.js";
 export { runBrain } from "./ai-engine.js";
 export { calculateEventEconomics, prioritizeOpportunities, projectClose } from "./profitability.js";
+export { signVenuePayload, verifyVenueSignature, normalizeVenueEvent, reconcileVenueBatch } from "./ingestion.js";
+export { productionReadiness } from "./readiness.js";
