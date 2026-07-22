@@ -53,7 +53,8 @@ state and missing-field counts, never secret names or values.
 
 ## Paid pilot gate
 
-`GET /api/readiness` is the fail-closed operational gate for a real paid pilot. It returns `503`
+`GET /api/readiness` is the fail-closed operational gate for a real paid pilot. It is routed through
+the consolidated integrations function to stay within deployment limits and returns `503`
 until durable storage, OIDC/JWKS authentication, enforced MFA, signed read-only ingestion,
 monitoring, backups, and restore evidence are configured. Signed POS events are accepted through
 `POST /api/ingest` only after a durable idempotent sink is configured; client-provided tenant IDs

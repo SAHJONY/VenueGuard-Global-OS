@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { normalizeVenueEvent, productionReadiness, reconcileVenueBatch, signVenuePayload, verifyVenueSignature } from "../packages/core/src/index.js";
-import readiness from "../api/readiness.js";
+import readiness from "../api/integrations.js";
 import ingest from "../api/ingest.js";
 import { readFile } from "node:fs/promises";
 
@@ -43,7 +43,7 @@ test("production readiness is redacted and fails closed", () => {
 
 test("readiness API uses service unavailable while critical gates are blocked", () => {
   const { result, response } = responseRecorder();
-  readiness({ method: "GET" }, response);
+  readiness({ method: "GET", query: { view: "readiness" } }, response);
   assert.equal(result.statusCode, 503);
   assert.equal(result.payload.secretsExposed, false);
 });
