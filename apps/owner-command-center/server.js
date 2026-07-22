@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { OperationalLedger } from "../../packages/core/src/index.js";
+import { ecosystem } from "../../api/_demo-data.js";
 
-const publicDir = fileURLToPath(new URL("./public", import.meta.url));
+const publicDir = fileURLToPath(new URL("../../public", import.meta.url));
 const ledger = new OperationalLedger();
 const tenantId = "tenant_velvet_th";
 const venueId = "venue_velvet_th_01";
@@ -16,6 +17,7 @@ const server = http.createServer(async (request, response) => {
   if (url.pathname === "/api/health") return json(response, 200, { status: "ok", service: "owner-command-center" });
   if (url.pathname === "/api/summary") return json(response, 200, ledger.summary({ tenantId, venueId }));
   if (url.pathname === "/api/events") return json(response, 200, ledger.list({ tenantId, venueId, limit: 20 }).reverse());
+  if (url.pathname === "/api/ecosystem") return json(response, 200, ecosystem);
 
   const path = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
   if (path.includes("..")) return json(response, 400, { error: "invalid path" });

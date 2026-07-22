@@ -14,6 +14,9 @@ Open `http://localhost:3000`.
 ## Current scope
 
 - Owner Command Center demonstration for VELVET TH.
+- Profit Autopilot with contribution economics, close forecasting, and ranked recoverable opportunities.
+- Executive revenue velocity, channel mix, and per-guest performance intelligence.
+- Interactive owner approvals and an explainable VenueGuard command interface in demo mode.
 - Tenant-scoped identity and role authorization.
 - Append-only operational event ledger.
 - Owner-only critical action policy.
@@ -24,6 +27,14 @@ Open `http://localhost:3000`.
 
 This release uses demonstration data. It does not move money or connect to a
 live payment processor.
+
+## Commercial model
+
+VenueGuard is positioned around measurable profit recovery rather than dashboard access alone.
+The product foundation supports tiered subscriptions, with the Profit Autopilot providing a clear
+path to premium pricing and future performance-based revenue capture. Live recommendations must
+remain human-approved until production data quality, provider integrations, and governance controls
+have been validated.
 
 ## Production boundaries
 

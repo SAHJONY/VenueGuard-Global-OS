@@ -17,6 +17,25 @@ export const events = Object.freeze([
 
 export const ecosystem = Object.freeze({
   venue: { name: "VELVET TH", city: "Chicago", currency: "USD", timezone: "America/Chicago" },
+  network: { venues: 4, live: 3, monthlyRevenue: 684320, monthlyGrowthPct: 18.4 },
+  economics: { revenue: 37080, variableCosts: 18842, contribution: 18238, marginPct: 49.2, revenuePerGuest: 49.97 },
+  forecast: { projectedClose: 42600, target: 40000, confidencePct: 91, current: 37080 },
+  hourlyRevenue: [
+    { hour: "8 PM", actual: 2200, forecast: 2400 }, { hour: "9 PM", actual: 5100, forecast: 4800 },
+    { hour: "10 PM", actual: 8900, forecast: 8200 }, { hour: "11 PM", actual: 11200, forecast: 10500 },
+    { hour: "12 AM", actual: 9680, forecast: 10100 }, { hour: "1 AM", actual: null, forecast: 4900 },
+    { hour: "2 AM", actual: null, forecast: 1700 }
+  ],
+  opportunities: [
+    { id: "opp-1", title: "Release 14 no-show VIP tables", detail: "Waitlist demand can recover otherwise lost inventory", recoverable: 2380, confidence: 0.94, urgency: 1.5, owner: "Guest Ops", action: "Release tables", severity: "critical" },
+    { id: "opp-2", title: "Raise final-release ticket price", detail: "158 tickets remain; demand is 22% above baseline", recoverable: 1896, confidence: 0.88, urgency: 1.25, owner: "Revenue AI", action: "Approve +$12", severity: "high" },
+    { id: "opp-3", title: "Investigate tequila variance", detail: "0.4 bottles outside recipe tolerance at Bar 2", recoverable: 84, confidence: 0.99, urgency: 1.1, owner: "Bar Lead", action: "Assign review", severity: "medium" }
+  ],
+  channels: [
+    { label: "Bar & table service", amount: 14820, growth: 12 }, { label: "Direct tickets", amount: 22260, growth: 24 },
+    { label: "Reservations", amount: 6480, growth: 9 }, { label: "Sponsorship", amount: 4200, growth: 31 }
+  ],
+  customer: { repeatRatePct: 38, vipGuests: 126, waitlist: 94, averageSpend: 50, capturedProfilesPct: 87 },
   modules: [
     { id: "cash", label: "Cash control", status: "live", metric: "$14,820", detail: "Sales, refunds, tips and close reconciliation" },
     { id: "inventory", label: "Inventory", status: "attention", metric: "98.6%", detail: "Supplier-to-consumption traceability" },
