@@ -30,6 +30,18 @@ alter table daily_profit_snapshots enable row level security;
 alter table approval_requests enable row level security;
 alter table security_audit_log enable row level security;
 
+alter table tenants force row level security;
+alter table identities force row level security;
+alter table venues force row level security;
+alter table operational_events force row level security;
+alter table payment_intents force row level security;
+alter table subscriptions force row level security;
+alter table connector_sources force row level security;
+alter table ingestion_receipts force row level security;
+alter table daily_profit_snapshots force row level security;
+alter table approval_requests force row level security;
+alter table security_audit_log force row level security;
+
 create schema if not exists app_private;
 create or replace function app_private.current_tenant_id() returns uuid language sql stable as $$ select nullif(current_setting('app.tenant_id', true), '')::uuid $$;
 

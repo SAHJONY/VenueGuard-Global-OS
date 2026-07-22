@@ -37,7 +37,9 @@ test("production readiness is redacted and fails closed", () => {
   assert.equal(blocked.mode, "PILOT_BLOCKED");
   assert.equal(blocked.secretsExposed, false);
   assert.ok(blocked.blockerCount > 0);
-  const ready = productionReadiness({ DATABASE_URL: "set", AUTH_ISSUER: "set", AUTH_AUDIENCE: "set", AUTH_JWKS_URL: "set", AUTH_MFA_ENFORCED: "true", POS_WEBHOOK_SECRET: "set", PILOT_TENANT_ID: "set", PILOT_VENUE_ID: "set", DATABASE_INGEST_URL: "set", DATABASE_INGEST_TOKEN: "set", SENTRY_DSN: "set", HEALTHCHECK_TOKEN: "set", DATABASE_BACKUP_POLICY: "daily", DATABASE_RESTORE_TESTED_AT: "2026-07-22" });
+  const migrationOnly = productionReadiness({ DATABASE_URL: "set" });
+  assert.equal(migrationOnly.checks.database.ready, false);
+  const ready = productionReadiness({ VENUEGUARD_DATABASE_URL: "set", AUTH_ISSUER: "set", AUTH_AUDIENCE: "set", AUTH_JWKS_URL: "set", AUTH_MFA_ENFORCED: "true", POS_WEBHOOK_SECRET: "set", PILOT_TENANT_ID: "set", PILOT_VENUE_ID: "set", DATABASE_INGEST_URL: "set", DATABASE_INGEST_TOKEN: "set", SENTRY_DSN: "set", HEALTHCHECK_TOKEN: "set", DATABASE_BACKUP_POLICY: "daily", DATABASE_RESTORE_TESTED_AT: "2026-07-22" });
   assert.equal(ready.mode, "PILOT_READY");
 });
 
@@ -59,6 +61,7 @@ test("database schema enforces tenant policies on operational and profit data", 
   const schema = await readFile(new URL("../db/schema.sql", import.meta.url), "utf8");
   for (const table of ["operational_events", "ingestion_receipts", "daily_profit_snapshots", "approval_requests", "security_audit_log"]) {
     assert.match(schema, new RegExp(`alter table ${table} enable row level security`));
+    assert.match(schema, new RegExp(`alter table ${table} force row level security`));
     assert.match(schema, new RegExp(`create policy tenant_isolation on ${table}`));
   }
   assert.match(schema, /current_setting\('app\.tenant_id'/);

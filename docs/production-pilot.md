@@ -14,7 +14,8 @@ or discipline staff. Provider credentials should use the narrowest read-only sco
 
 ## Go-live checklist
 
-1. Apply `db/schema.sql` through a reviewed migration and use a non-owner application role.
+1. Apply `db/schema.sql` through a reviewed migration. Use `DATABASE_URL` only for migrations and
+   `VENUEGUARD_DATABASE_URL` for application traffic; the runtime role must have `NOBYPASSRLS`.
 2. Set `app.tenant_id` from the verified server session inside every database transaction.
 3. Test cross-tenant reads and writes against the deployed database.
 4. Configure OIDC authentication, JWKS verification, mandatory MFA, session expiry, and role claims.

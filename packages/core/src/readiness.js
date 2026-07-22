@@ -1,5 +1,5 @@
 const gates = Object.freeze({
-  database: ["DATABASE_URL"],
+  database: ["VENUEGUARD_DATABASE_URL"],
   authentication: ["AUTH_ISSUER", "AUTH_AUDIENCE", "AUTH_JWKS_URL"],
   mfa: ["AUTH_MFA_ENFORCED"],
   ingestion: ["POS_WEBHOOK_SECRET", "PILOT_TENANT_ID", "PILOT_VENUE_ID", "DATABASE_INGEST_URL", "DATABASE_INGEST_TOKEN"],

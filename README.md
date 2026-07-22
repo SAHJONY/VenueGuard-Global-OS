@@ -60,5 +60,9 @@ monitoring, backups, and restore evidence are configured. Signed POS events are 
 `POST /api/ingest` only after a durable idempotent sink is configured; client-provided tenant IDs
 are ignored in favor of server-controlled scope.
 
+Database readiness performs a live query through `VENUEGUARD_DATABASE_URL` and requires the
+`venueguard_app` runtime role with `NOBYPASSRLS`. The integration-provided `DATABASE_URL` is
+reserved for reviewed migrations and never counts as application readiness.
+
 See [docs/production-pilot.md](docs/production-pilot.md) for the go-live, profit-evidence,
 incident-response, and rollback requirements. Passing tests alone does not authorize a pilot.
