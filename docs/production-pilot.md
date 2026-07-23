@@ -19,6 +19,9 @@ or discipline staff. Provider credentials should use the narrowest read-only sco
 2. Set `app.tenant_id` from the verified server session inside every database transaction.
 3. Test cross-tenant reads and writes against the deployed database.
 4. Configure OIDC authentication, JWKS verification, mandatory MFA, session expiry, and role claims.
+   Keep `AUTH_JWT_ALGORITHMS=RS256`, require an `amr` MFA method (or an explicitly configured
+   MFA `acr` value), and verify `/api/auth/session` rejects unsigned, expired, wrong-issuer,
+   wrong-audience, and non-MFA tokens. Readiness must prove the HTTPS JWKS contains usable keys.
 5. Configure the signed POS webhook and a durable idempotent ingestion sink.
 6. Reconcile at least seven historical business days to source totals within 0.5%.
 7. Configure encrypted secrets, error monitoring, synthetic health checks, and alert routing.

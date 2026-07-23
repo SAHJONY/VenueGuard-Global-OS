@@ -4,7 +4,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/api/readiness", "destination": "/api/integrations?view=readiness" }
+    { "source": "/api/readiness", "destination": "/api/integrations?view=readiness" },
+    { "source": "/api/auth/session", "destination": "/api/integrations?view=session" }
   ],
   "headers": [
     {
