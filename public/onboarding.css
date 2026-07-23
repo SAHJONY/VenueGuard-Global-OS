@@ -1,0 +1,26 @@
+.onboarding-launch { white-space: nowrap; }
+.setup-form { display: grid; gap: 14px; margin-top: 18px; }
+.setup-form label { display: grid; gap: 7px; color: var(--muted); font-size: 10px; }
+.setup-form input,
+.setup-form select { width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 11px 12px; border-radius: 6px; outline: 0; }
+.setup-form input:focus,
+.setup-form select:focus { border-color: var(--green); }
+.setup-form small { color: var(--muted); }
+.setup-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.setup-check { grid-template-columns: auto 1fr !important; align-items: start; }
+.setup-check input { width: auto; margin-top: 2px; }
+.setup-security,
+.setup-review { border: 1px solid var(--line); background: var(--surface); padding: 14px; border-radius: 7px; }
+.setup-security b,
+.setup-review > b { color: var(--green); font-size: 11px; }
+.setup-security p,
+.setup-review p,
+.setup-review small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.setup-review { margin-top: 18px; }
+.setup-review dl { margin: 12px 0; }
+.setup-review dl div { display: flex; justify-content: space-between; gap: 18px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.setup-review dt { color: var(--muted); font-size: 9px; }
+.setup-review dd { margin: 0; text-align: right; font-size: 10px; }
+.setup-form > .primary { justify-self: start; }
+.setup-form select option { background: var(--surface); }
+@media (max-width: 800px) { .setup-row { grid-template-columns: 1fr; } }

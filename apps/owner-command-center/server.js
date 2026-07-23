@@ -30,6 +30,7 @@ const server = http.createServer(async (request, response) => {
   if (url.pathname === "/api/events") return json(response, 200, ledger.list({ tenantId, venueId, limit: 20 }).reverse());
   if (url.pathname === "/api/ecosystem") return json(response, 200, ecosystem);
   if (url.pathname === "/api/readiness") return invoke(integrations, request, response, { view: "readiness" });
+  if (url.pathname === "/api/profit-ledger") return invoke(integrations, request, response, { view: "profit-ledger" });
   if (url.pathname === "/api/auth/session") return invoke(integrations, request, response, { view: "session" });
   if (apiRoutes.has(url.pathname)) return invoke(apiRoutes.get(url.pathname), request, response, Object.fromEntries(url.searchParams));
 

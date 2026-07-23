@@ -97,21 +97,60 @@ test("commercial UI exposes platform plans and onboarding", async () => {
   assert.match(script, /readiness\.checks/);
   assert.match(script, /\/api\/readiness/);
   assert.match(script, /\/api\/auth\/session/);
+  assert.match(html, /data-action="onboarding"/);
+  assert.match(script, /Tenant legal name/);
+  assert.match(script, /Maximum legal capacity/);
+  assert.match(script, /capacity matches an official occupancy certificate/);
+  assert.match(script, /Nothing has been written to Neon, Auth0, Stripe/);
+});
+
+test("owner dashboard prioritizes verified money, decisions and reconciliation", async () => {
+  const [html, script, businessStyles] = await Promise.all([
+    readFile(new URL("../public/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/app.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/business-ui.css", import.meta.url), "utf8")
+  ]);
+  for (const copy of ["Tonight’s business", "CONFIRMED", "PROJECTED", "Money at risk", "OWNER DECISIONS", "NIGHTLY CLOSE", "Potential upside—not profit"]) assert.match(html, new RegExp(copy));
+  for (const id of ["overview-revenue", "profit", "money-risk", "recoverable-total", "owner-decisions", "overview-close-sources"]) assert.match(html, new RegExp(`id="${id}"`));
+  assert.match(script, /verifiedLedger\.confirmedAmount/);
+  assert.match(script, /closeControl\.missingSources/);
+  assert.match(script, /venueguard-theme/);
+  assert.match(businessStyles, /state-badge\.verified/);
+  assert.match(businessStyles, /state-badge\.projected/);
+  assert.match(businessStyles, /state-badge\.review/);
+});
+
+test("global localization supports persistent locale formatting and RTL", async () => {
+  const [html, script, i18n, styles] = await Promise.all([
+    readFile(new URL("../public/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/app.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/i18n.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/business-ui.css", import.meta.url), "utf8")
+  ]);
+  assert.match(html, /id="locale-select"/);
+  assert.match(script, /Intl\.NumberFormat\(activeLocale/);
+  assert.match(script, /Intl\.DateTimeFormat\(activeLocale/);
+  assert.match(script, /translateDocument\(\)/);
+  for (const locale of ["en-US", "es-US", "fr-FR", "pt-BR", "de-DE", "zh-CN", "ja-JP", "ar"]) assert.match(i18n, new RegExp(`id: "${locale}"`));
+  assert.match(i18n, /venueguard-locale/);
+  assert.match(i18n, /direction: "rtl"/);
+  assert.match(i18n, /packs\[activeLocale\]\?\.\[source\] \|\| source/);
+  assert.match(styles, /\[dir="rtl"\]/);
 });
 
 test("every operator workspace and control has a navigable fail-closed path", async () => {
   const [html, script, localServer] = await Promise.all([readFile(new URL("../public/index.html", import.meta.url), "utf8"), readFile(new URL("../public/app.js", import.meta.url), "utf8"), readFile(new URL("../apps/owner-command-center/server.js", import.meta.url), "utf8")]);
-  for (const view of ["overview", "growth", "cash", "inventory", "trace", "supply", "workforce", "tickets", "artists", "risk", "platform"]) {
+  for (const view of ["overview", "growth", "verification", "cash", "inventory", "trace", "supply", "workforce", "tickets", "artists", "risk", "platform"]) {
     assert.match(html, new RegExp(`data-view="${view}"`));
     assert.match(script, new RegExp(`"${view}"`));
   }
   const combined = `${html}\n${script}`;
-  for (const action of ["venue", "help", "account", "search", "notifications", "command", "readiness", "profit-help", "execute", "export", "sell", "contract", "subscribe"]) {
+  for (const action of ["venue", "help", "account", "search", "notifications", "command", "onboarding", "close-review", "readiness", "profit-help", "execute", "export", "sell", "contract", "subscribe"]) {
     assert.ok(combined.includes(`data-action="${action}"`) || combined.includes(`action==="${action}"`), `missing ${action} control`);
   }
   assert.doesNotMatch(combined, /All systems operational|Approved in demo/);
   assert.match(script, /No money, inventory, payroll, ticket, contract, or personnel change has been executed/);
-  for (const endpoint of ["brain", "catalog", "integrations", "platform", "readiness", "risk", "supply", "trace", "auth/session"]) assert.match(localServer, new RegExp(`/api/${endpoint}`));
+  for (const endpoint of ["brain", "catalog", "integrations", "platform", "profit-ledger", "readiness", "risk", "supply", "trace", "auth/session"]) assert.match(localServer, new RegExp(`/api/${endpoint}`));
 });
 
 test("platform API advertises global venues, portals and safe readiness", () => {

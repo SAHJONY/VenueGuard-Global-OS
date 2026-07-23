@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment, verifyTrace, integrationStatus, requireIntegration, BrainTask, brainStatus, routeBrainTask, assertModelActionAllowed, runBrain } from "../packages/core/src/index.js";
+import { OperationalLedger, Role, can, requireOwner, provisionTenant, portalFor, SubscriptionPlan, evaluateRisk, recommendReplenishment, verifyTrace, integrationStatus, requireIntegration, BrainTask, brainStatus, routeBrainTask, assertModelActionAllowed, runBrain, nightlyCloseControl, verifyProfitLedger } from "../packages/core/src/index.js";
 
 test("tenant isolation blocks cross-tenant access", () => {
   const actor = { verified: true, role: Role.OWNER, tenantId: "one" };
@@ -37,6 +37,32 @@ test("ledger is append-only and idempotent", () => {
   assert.equal(first.id, duplicate.id);
   assert.equal(ledger.list({ tenantId: "one" }).length, 1);
   assert.equal(ledger.list({ tenantId: "two" }).length, 0);
+});
+
+test("verified profit ledger never counts projections as realized profit", () => {
+  const ledger = verifyProfitLedger([{ id: "one", title: "Projected recovery", projectedAmount: 5000, evidenceIds: ["pos"], sourceTotalsReconciled: false }]);
+  assert.equal(ledger.projectedAmount, 5000);
+  assert.equal(ledger.confirmedAmount, 0);
+  assert.equal(ledger.claimableAmount, 0);
+  assert.equal(ledger.entries[0].status, "PROJECTED");
+  assert.equal(ledger.policy.forecastsAreProfit, false);
+});
+
+test("profit is confirmed only with reconciliation, evidence, independent verification and owner approval", () => {
+  const ledger = verifyProfitLedger([{ id: "verified", title: "Verified recovery", projectedAmount: 500, baselineAmount: 1000, actualAmount: 1500, confirmedAmount: 500, evidenceIds: ["pos-1", "bank-1"], sourceTotalsReconciled: true, independentVerification: { verifiedBy: "controller-1", verifiedAt: "2026-07-23", method: "source-recalculation" }, ownerApproval: { approvedBy: "owner-1", approvedAt: "2026-07-23" } }]);
+  assert.equal(ledger.entries[0].status, "CONFIRMED");
+  assert.equal(ledger.confirmedAmount, 500);
+  assert.equal(ledger.claimableAmount, 500);
+});
+
+test("nightly close remains human controlled and blocks missing source evidence", () => {
+  const ledger = verifyProfitLedger([]);
+  const blocked = nightlyCloseControl({ ledger, requiredSources: ["POS", "BANK"], receivedSources: ["POS"], unresolvedBreaks: 1 });
+  assert.equal(blocked.readyForOwnerApproval, false);
+  assert.deepEqual(blocked.missingSources, ["BANK"]);
+  const ready = nightlyCloseControl({ ledger, requiredSources: ["POS"], receivedSources: ["POS"] });
+  assert.equal(ready.status, "READY_FOR_OWNER_APPROVAL");
+  assert.equal(ready.automaticCloseAllowed, false);
 });
 
 test("risk controls hold critical signals for owner with explainable reasons", () => {
