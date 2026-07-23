@@ -104,6 +104,22 @@ test("commercial UI exposes platform plans and onboarding", async () => {
   assert.match(script, /Nothing has been written to Neon, Auth0, Stripe/);
 });
 
+test("owner dashboard prioritizes verified money, decisions and reconciliation", async () => {
+  const [html, script, businessStyles] = await Promise.all([
+    readFile(new URL("../public/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/app.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/business-ui.css", import.meta.url), "utf8")
+  ]);
+  for (const copy of ["Tonight’s business", "CONFIRMED", "PROJECTED", "Money at risk", "OWNER DECISIONS", "NIGHTLY CLOSE", "Potential upside—not profit"]) assert.match(html, new RegExp(copy));
+  for (const id of ["overview-revenue", "profit", "money-risk", "recoverable-total", "owner-decisions", "overview-close-sources"]) assert.match(html, new RegExp(`id="${id}"`));
+  assert.match(script, /verifiedLedger\.confirmedAmount/);
+  assert.match(script, /closeControl\.missingSources/);
+  assert.match(script, /venueguard-theme/);
+  assert.match(businessStyles, /state-badge\.verified/);
+  assert.match(businessStyles, /state-badge\.projected/);
+  assert.match(businessStyles, /state-badge\.review/);
+});
+
 test("every operator workspace and control has a navigable fail-closed path", async () => {
   const [html, script, localServer] = await Promise.all([readFile(new URL("../public/index.html", import.meta.url), "utf8"), readFile(new URL("../public/app.js", import.meta.url), "utf8"), readFile(new URL("../apps/owner-command-center/server.js", import.meta.url), "utf8")]);
   for (const view of ["overview", "growth", "verification", "cash", "inventory", "trace", "supply", "workforce", "tickets", "artists", "risk", "platform"]) {
