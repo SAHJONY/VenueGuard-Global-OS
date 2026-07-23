@@ -97,21 +97,26 @@ test("commercial UI exposes platform plans and onboarding", async () => {
   assert.match(script, /readiness\.checks/);
   assert.match(script, /\/api\/readiness/);
   assert.match(script, /\/api\/auth\/session/);
+  assert.match(html, /data-action="onboarding"/);
+  assert.match(script, /Tenant legal name/);
+  assert.match(script, /Maximum legal capacity/);
+  assert.match(script, /capacity matches an official occupancy certificate/);
+  assert.match(script, /Nothing has been written to Neon, Auth0, Stripe/);
 });
 
 test("every operator workspace and control has a navigable fail-closed path", async () => {
   const [html, script, localServer] = await Promise.all([readFile(new URL("../public/index.html", import.meta.url), "utf8"), readFile(new URL("../public/app.js", import.meta.url), "utf8"), readFile(new URL("../apps/owner-command-center/server.js", import.meta.url), "utf8")]);
-  for (const view of ["overview", "growth", "cash", "inventory", "trace", "supply", "workforce", "tickets", "artists", "risk", "platform"]) {
+  for (const view of ["overview", "growth", "verification", "cash", "inventory", "trace", "supply", "workforce", "tickets", "artists", "risk", "platform"]) {
     assert.match(html, new RegExp(`data-view="${view}"`));
     assert.match(script, new RegExp(`"${view}"`));
   }
   const combined = `${html}\n${script}`;
-  for (const action of ["venue", "help", "account", "search", "notifications", "command", "readiness", "profit-help", "execute", "export", "sell", "contract", "subscribe"]) {
+  for (const action of ["venue", "help", "account", "search", "notifications", "command", "onboarding", "close-review", "readiness", "profit-help", "execute", "export", "sell", "contract", "subscribe"]) {
     assert.ok(combined.includes(`data-action="${action}"`) || combined.includes(`action==="${action}"`), `missing ${action} control`);
   }
   assert.doesNotMatch(combined, /All systems operational|Approved in demo/);
   assert.match(script, /No money, inventory, payroll, ticket, contract, or personnel change has been executed/);
-  for (const endpoint of ["brain", "catalog", "integrations", "platform", "readiness", "risk", "supply", "trace", "auth/session"]) assert.match(localServer, new RegExp(`/api/${endpoint}`));
+  for (const endpoint of ["brain", "catalog", "integrations", "platform", "profit-ledger", "readiness", "risk", "supply", "trace", "auth/session"]) assert.match(localServer, new RegExp(`/api/${endpoint}`));
 });
 
 test("platform API advertises global venues, portals and safe readiness", () => {

@@ -1,0 +1,28 @@
+.verification-hero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+.verification-hero article { display: grid; gap: 8px; padding: 24px; border: 1px solid var(--line); background: var(--panel); }
+.verification-hero article.confirmed { border-color: #3d5b31; background: linear-gradient(145deg, #1b2918, var(--panel)); }
+.verification-hero small { color: var(--muted); font-size: 9px; letter-spacing: .12em; }
+.verification-hero strong { font: 700 31px Manrope; }
+.verification-hero .confirmed strong { color: var(--green); }
+.verification-hero span { color: var(--muted); font-size: 9px; }
+.verification-layout { display: grid; grid-template-columns: 1.45fr 1fr; gap: 10px; }
+.profit-ledger { display: grid; gap: 8px; }
+.profit-row { display: grid; grid-template-columns: 1fr auto; gap: 14px; padding: 15px; background: var(--surface); border: 1px solid var(--line); }
+.profit-row h3 { margin: 0 0 5px; font-size: 11px; }
+.profit-row p { margin: 0; color: var(--muted); font-size: 9px; }
+.profit-row > div:last-child { display: grid; justify-items: end; gap: 4px; }
+.profit-row strong { color: var(--green); font: 700 17px Manrope; }
+.profit-row em { color: var(--amber); font-style: normal; font-size: 8px; }
+.profit-row.confirmed em { color: var(--green); }
+.evidence-gaps { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.evidence-gaps span { padding: 3px 6px; color: var(--muted); background: #202620; border-radius: 4px; font-size: 7px; }
+.close-sources { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin-bottom: 14px; }
+.close-sources span { padding: 10px; border: 1px solid var(--line); color: var(--muted); font-size: 9px; }
+.close-sources span::before { content: "○"; color: var(--amber); margin-right: 7px; }
+.close-blockers { color: var(--muted); font-size: 9px; line-height: 1.7; margin-bottom: 16px; }
+.close-blockers b { display: block; color: var(--amber); font-size: 10px; }
+.verification-policy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; padding: 14px 18px; border: 1px solid var(--line); background: var(--surface); }
+.verification-policy b { margin-right: auto; font-size: 10px; }
+.verification-policy span { color: var(--muted); border: 1px solid var(--line); padding: 5px 8px; border-radius: 99px; font-size: 8px; }
+@media (max-width: 1000px) { .verification-hero, .verification-layout { grid-template-columns: 1fr; } }
+@media (max-width: 500px) { .close-sources { grid-template-columns: 1fr; } }

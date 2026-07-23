@@ -51,6 +51,17 @@ test("readiness API uses service unavailable while critical gates are blocked", 
   assert.equal(result.payload.secretsExposed, false);
 });
 
+test("profit ledger API exposes no realized profit without verified evidence", async () => {
+  const { result, response } = responseRecorder();
+  await readiness({ method: "GET", query: { view: "profit-ledger" } }, response);
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.payload.dataMode, "CONTROLLED_DEMO");
+  assert.equal(result.payload.ledger.confirmedAmount, 0);
+  assert.equal(result.payload.ledger.policy.forecastsAreProfit, false);
+  assert.equal(result.payload.close.automaticCloseAllowed, false);
+  assert.equal(result.payload.secretsExposed, false);
+});
+
 test("OIDC verifies signatures and claims while requiring MFA", async () => {
   const { publicKey, privateKey } = await generateKeyPair("RS256");
   const publicJwk = { ...await exportJWK(publicKey), kid: "test-key", alg: "RS256", use: "sig" };

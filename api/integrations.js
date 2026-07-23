@@ -1,6 +1,7 @@
 import { integrationStatus } from "../packages/core/src/integrations.js";
 import { productionReadiness } from "../packages/core/src/readiness.js";
 import { verifyJwksConnectivity, verifyOidcRequest } from "../packages/core/src/auth.js";
+import { nightlyCloseControl, verifyProfitLedger } from "../packages/core/src/profit-ledger.js";
 import { neon } from "@neondatabase/serverless";
 
 export default async function handler(request, response) {
@@ -32,6 +33,15 @@ export default async function handler(request, response) {
     const blockers = Object.entries(checks).filter(([, value]) => !value.ready).map(([name]) => name);
     const verified = { ...readiness, mode: blockers.length ? "PILOT_BLOCKED" : "PILOT_READY", checks, blockers, blockerCount: blockers.length };
     return response.status(verified.mode === "PILOT_READY" ? 200 : 503).json(verified);
+  }
+  if (request.query?.view === "profit-ledger") {
+    const ledger = verifyProfitLedger([
+      { id: "vip-no-show", title: "Recover no-show VIP inventory", projectedAmount: 2380, evidenceIds: ["demo-reservations"], sourceTotalsReconciled: false, sourceWindow: "Current event" },
+      { id: "ticket-yield", title: "Optimize final-release ticket yield", projectedAmount: 1896, evidenceIds: [], sourceTotalsReconciled: false, sourceWindow: "Current event" },
+      { id: "inventory-variance", title: "Resolve premium tequila variance", projectedAmount: 84, evidenceIds: ["demo-pos", "demo-inventory"], sourceTotalsReconciled: false, sourceWindow: "Current event" }
+    ]);
+    const close = nightlyCloseControl({ ledger, requiredSources: ["POS", "PAYMENTS", "INVENTORY", "LABOR", "TICKETING"], receivedSources: [], unresolvedBreaks: 1, pendingApprovals: 0 });
+    return response.status(200).json({ dataMode: "CONTROLLED_DEMO", ledger, close, secretsExposed: false });
   }
   const status = integrationStatus(process.env);
   return response.status(200).json({

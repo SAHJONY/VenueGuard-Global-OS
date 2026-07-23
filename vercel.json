@@ -5,6 +5,7 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/api/readiness", "destination": "/api/integrations?view=readiness" },
+    { "source": "/api/profit-ledger", "destination": "/api/integrations?view=profit-ledger" },
     { "source": "/api/auth/session", "destination": "/api/integrations?view=session" }
   ],
   "headers": [
