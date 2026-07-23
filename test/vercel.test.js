@@ -120,6 +120,24 @@ test("owner dashboard prioritizes verified money, decisions and reconciliation",
   assert.match(businessStyles, /state-badge\.review/);
 });
 
+test("global localization supports persistent locale formatting and RTL", async () => {
+  const [html, script, i18n, styles] = await Promise.all([
+    readFile(new URL("../public/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/app.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/i18n.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/business-ui.css", import.meta.url), "utf8")
+  ]);
+  assert.match(html, /id="locale-select"/);
+  assert.match(script, /Intl\.NumberFormat\(activeLocale/);
+  assert.match(script, /Intl\.DateTimeFormat\(activeLocale/);
+  assert.match(script, /translateDocument\(\)/);
+  for (const locale of ["en-US", "es-US", "fr-FR", "pt-BR", "de-DE", "zh-CN", "ja-JP", "ar"]) assert.match(i18n, new RegExp(`id: "${locale}"`));
+  assert.match(i18n, /venueguard-locale/);
+  assert.match(i18n, /direction: "rtl"/);
+  assert.match(i18n, /packs\[activeLocale\]\?\.\[source\] \|\| source/);
+  assert.match(styles, /\[dir="rtl"\]/);
+});
+
 test("every operator workspace and control has a navigable fail-closed path", async () => {
   const [html, script, localServer] = await Promise.all([readFile(new URL("../public/index.html", import.meta.url), "utf8"), readFile(new URL("../public/app.js", import.meta.url), "utf8"), readFile(new URL("../apps/owner-command-center/server.js", import.meta.url), "utf8")]);
   for (const view of ["overview", "growth", "verification", "cash", "inventory", "trace", "supply", "workforce", "tickets", "artists", "risk", "platform"]) {

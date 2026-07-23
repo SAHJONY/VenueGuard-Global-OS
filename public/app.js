@@ -1,11 +1,14 @@
-const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
+import { activeLocale, locales, setLocale, t, translateDocument } from "./i18n.js";
+let money = new Intl.NumberFormat(activeLocale, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+let number = new Intl.NumberFormat(activeLocale, { maximumFractionDigits: 1 });
 document.documentElement.dataset.theme = localStorage.getItem("venueguard-theme") || "dark";
 const navItems = [["overview","Today","⌂"],["verification","Verified profit","✓"],["cash","Money control","$"],["growth","Opportunities","↗"],["inventory","Inventory","◇"],["trace","Traceability","⌁"],["supply","Purchasing","↻"],["workforce","Team","◎"],["tickets","Tickets & guests","▣"],["artists","Events & artists","☆"],["risk","Risk desk","!"],["platform","Setup & billing","⚙"]];
 const $ = selector => document.querySelector(selector);
 const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char]);
 async function json(path) { const response = await fetch(path); if (!response.ok) throw new Error(`${path}: ${response.status}`); return response.json(); }
 async function jsonResult(path) { const response = await fetch(path); let body = {}; try { body = await response.json(); } catch {} return { ok: response.ok, status: response.status, body }; }
+$("#locale-select").innerHTML = locales.map(locale => `<option value="${locale.id}" ${locale.id===activeLocale?"selected":""}>${locale.label}</option>`).join("");
+$("#locale-select").addEventListener("change", event => setLocale(event.target.value));
 
 try {
   const [summary, events, data, catalog, platform, risk, supply, trace, integrations, profitVerification, readinessResult, sessionResult] = await Promise.all([
@@ -14,9 +17,11 @@ try {
   const readiness = readinessResult.body;
   const session = sessionResult.body;
   const verifiedLedger=profitVerification.ledger, closeControl=profitVerification.close;
+  money = new Intl.NumberFormat(activeLocale, { style: "currency", currency: data.venue.currency || "USD", maximumFractionDigits: 0 });
+  number = new Intl.NumberFormat(activeLocale, { maximumFractionDigits: 1 });
   $("#venue").textContent = data.venue.name;
   $("#venue-location").textContent = `${data.venue.city} · ${data.venue.timezone}`;
-  $("#business-date").textContent = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date());
+  $("#business-date").textContent = new Intl.DateTimeFormat(activeLocale, { month: "short", day: "numeric", year: "numeric" }).format(new Date());
   $("#overview-revenue").textContent = money.format(data.economics.revenue);
   $("#profit").textContent = money.format(verifiedLedger.confirmedAmount);
   $("#recoverable-total").textContent = money.format(verifiedLedger.projectedAmount);
@@ -25,7 +30,7 @@ try {
   $("#money-risk-detail").textContent=`${risk.alerts.length+closeControl.blockers.length} controls require review`;
   $("#forecast").textContent = money.format(data.forecast.projectedClose);
   $("#confidence").textContent = `${data.forecast.confidencePct}% confidence`;
-  $("#nav").innerHTML = navItems.map(([id,label,icon], i) => `<button class="${i ? "" : "active"}" data-target="${id}" aria-current="${i ? "false" : "page"}"><span>${icon}</span>${label}${id === "growth" ? '<em>3</em>' : ""}</button>`).join("");
+  $("#nav").innerHTML = navItems.map(([id,label,icon], i) => `<button class="${i ? "" : "active"}" data-target="${id}" aria-current="${i ? "false" : "page"}"><span>${icon}</span>${t(label)}${id === "growth" ? '<em>3</em>' : ""}</button>`).join("");
   const kpis = [["Gross revenue",money.format(data.economics.revenue),"+21.7%","All channels"],["Contribution margin",`${data.economics.marginPct}%`,"+4.2 pts","After variable costs"],["Revenue / guest",money.format(data.economics.revenuePerGuest),"+$6.20","742 admissions"],["Recoverable upside",money.format(data.opportunities.reduce((sum,row)=>sum+row.recoverable,0)),"3 actions","AI-identified"]];
   if($("#kpis")) $("#kpis").innerHTML = kpis.map(([label,value,delta,detail]) => `<article><div><small>${label}</small><span>↗</span></div><strong>${value}</strong><p><b>${delta}</b> · ${detail}</p></article>`).join("");
   renderChart(data.hourlyRevenue);
@@ -74,9 +79,9 @@ try {
   $("#health-detail").textContent = pilotReady ? "Open readiness evidence" : `${blockers.length} gates require attention`;
   $("#live-state").innerHTML = `<i></i> ${pilotReady ? "PILOT READY" : "DEMO"} · ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
 
-  function show(target,{replace=false}={}){if(!navItems.some(([id])=>id===target))target="overview";document.querySelectorAll(".view").forEach(view=>view.classList.toggle("active",view.dataset.view===target));document.querySelectorAll("#nav button").forEach(button=>{const active=button.dataset.target===target;button.classList.toggle("active",active);button.setAttribute("aria-current",active?"page":"false");});document.body.classList.remove("nav-open");$(".mobile-menu").setAttribute("aria-expanded","false");const hash=`#${target}`;if(location.hash!==hash)history[replace?"replaceState":"pushState"](null,"",hash);document.title=`VenueGuard — ${navItems.find(([id])=>id===target)[1]}`;scrollTo({top:0,behavior:"smooth"});}
-  function toast(message){const node=$("#toast");node.textContent=message;node.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>node.classList.remove("show"),3200);}
-  function openWorkspace(title,eyebrow,content){$("#dialog-title").textContent=title;$("#dialog-eyebrow").textContent=eyebrow;$("#dialog-content").innerHTML=content;$("#workspace-dialog").showModal();}
+  function show(target,{replace=false}={}){if(!navItems.some(([id])=>id===target))target="overview";document.querySelectorAll(".view").forEach(view=>view.classList.toggle("active",view.dataset.view===target));document.querySelectorAll("#nav button").forEach(button=>{const active=button.dataset.target===target;button.classList.toggle("active",active);button.setAttribute("aria-current",active?"page":"false");});document.body.classList.remove("nav-open");$(".mobile-menu").setAttribute("aria-expanded","false");const hash=`#${target}`;if(location.hash!==hash)history[replace?"replaceState":"pushState"](null,"",hash);document.title=`VenueGuard — ${t(navItems.find(([id])=>id===target)[1])}`;scrollTo({top:0,behavior:"smooth"});}
+  function toast(message){const node=$("#toast");node.textContent=t(message);node.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>node.classList.remove("show"),3200);}
+  function openWorkspace(title,eyebrow,content){$("#dialog-title").textContent=t(title);$("#dialog-eyebrow").textContent=t(eyebrow);$("#dialog-content").innerHTML=content;translateDocument($("#workspace-dialog"));$("#workspace-dialog").showModal();}
   function readinessContent(){return `<p class="dialog-summary">${pilotReady ? "Every mandatory external gate currently reports verified." : "VenueGuard is protecting real operations until every external gate is verified."}</p><div class="gate-list">${Object.entries(readiness.checks||{}).map(([name,state])=>`<div><span>${escapeHtml(name)}</span><b class="${state.ready?"implemented":"pending"}">${state.ready?"VERIFIED":"BLOCKED"}</b></div>`).join("")}</div><p class="dialog-note">Financial, purchasing, payroll, personnel, and contractual actions always require authorized human approval.</p>`;}
   function onboardingContent(){return `<p class="dialog-summary">Enter verified legal and operating information. VenueGuard will not create production identities from estimated or provisional data.</p><form id="onboarding-form" class="setup-form"><label><span>Tenant legal name</span><input name="tenantName" required maxlength="160" autocomplete="organization" placeholder="Registered legal entity"></label><label><span>Venue name</span><input name="venueName" required maxlength="160" placeholder="Public venue name"></label><div class="setup-row"><label><span>Venue type</span><select name="venueType" required><option value="">Select type</option><option>Nightclub</option><option>Bar</option><option>Lounge</option><option>Other</option></select></label><label><span>Venue timezone</span><input name="timezone" required value="America/Chicago" pattern="[A-Za-z_]+\/[A-Za-z_+-]+" aria-describedby="timezone-help"><small id="timezone-help">IANA timezone, such as America/Chicago</small></label></div><label><span>Maximum legal capacity</span><input name="capacity" required type="number" min="1" max="1000000" inputmode="numeric" placeholder="From occupancy or fire authorization"></label><label><span>Owner administrator email</span><input name="ownerEmail" required type="email" autocomplete="email" placeholder="owner@example.com"></label><label class="setup-check"><input name="capacityVerified" required type="checkbox"><span>I confirm the capacity matches an official occupancy certificate, fire permit, or equivalent authorization.</span></label><div class="setup-security"><b>Security boundary</b><p>No password, MFA code, payment key, bank information, or identity document should be entered here. Submission cannot activate sales.</p></div><button type="submit" class="primary">Review onboarding details</button></form><div id="onboarding-result" aria-live="polite"></div>`;}
   function blockedWorkflow(title,detail){openWorkspace(title,pilotReady?"OWNER REVIEW REQUIRED":"CONTROLLED DEMO",`<p class="dialog-summary">${escapeHtml(detail)}</p><div class="workflow-state"><b>${pilotReady?"Ready for authenticated owner review":"Not connected to a live provider"}</b><p>No money, inventory, payroll, ticket, contract, or personnel change has been executed.</p></div>${pilotReady?'<button type="button" class="primary" data-action="owner-review">Continue to owner review</button>':`<button type="button" class="outline" data-target="platform">Open production readiness</button>`}`);}
@@ -87,10 +92,11 @@ try {
   $(".mobile-menu").addEventListener("click",event=>{const open=document.body.classList.toggle("nav-open");event.currentTarget.setAttribute("aria-expanded",String(open));});
   $("#command").addEventListener("click",event=>{if(event.target===$("#command"))$("#command").close();const suggestion=event.target.closest(".suggestions button");if(suggestion){$("#commandInput").value=suggestion.textContent;answer(suggestion.textContent);}});
   $("#commandInput").addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();answer(event.target.value);}});
-  function renderSearch(query){const normalized=query.trim().toLowerCase();const rows=navItems.filter(([,label])=>!normalized||label.toLowerCase().includes(normalized));$("#search-results").innerHTML=rows.length?rows.map(([id,label,icon])=>`<button type="button" class="result-row" data-target="${id}"><span>${icon} ${label}</span><small>Open workspace</small></button>`).join(""):'<p class="empty-state">No matching workspace.</p>';}
+  function renderSearch(query){const normalized=query.trim().toLocaleLowerCase(activeLocale);const rows=navItems.filter(([,label])=>!normalized||t(label).toLocaleLowerCase(activeLocale).includes(normalized));$("#search-results").innerHTML=rows.length?rows.map(([id,label,icon])=>`<button type="button" class="result-row" data-target="${id}"><span>${icon} ${t(label)}</span><small>${t("Open workspace")}</small></button>`).join(""):`<p class="empty-state">${t("No matching workspace.")}</p>`;}
   $("#searchInput").addEventListener("input",event=>renderSearch(event.target.value));
   window.addEventListener("hashchange",()=>show(location.hash.slice(1),{replace:true}));
   document.addEventListener("keydown",event=>{if(event.key==="Escape"&&document.body.classList.contains("nav-open")){document.body.classList.remove("nav-open");$(".mobile-menu").setAttribute("aria-expanded","false");}});
+  translateDocument();
   show(location.hash.slice(1)||"overview",{replace:true});
   function answer(question){if(!question.trim())return;$("#answer").innerHTML=`<span>✦</span><div><small>VENUEGUARD ANALYSIS</small><p>Tonight’s profit is ahead because direct ticket demand is 24% higher and revenue per guest is up $6.20. The fastest additional upside is releasing no-show VIP tables and approving final-release pricing—together worth an estimated <b>$4,276</b>. All actions require authorized human approval.</p><button data-target="growth">Open action plan →</button></div>`;}
 } catch(error){$("main").insertAdjacentHTML("afterbegin",`<div class="error">Live data is temporarily unavailable. ${escapeHtml(error.message)}</div>`);}

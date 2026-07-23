@@ -48,6 +48,8 @@ body { background: var(--bg); color: var(--ink); }
 main { max-width: 1780px; padding-bottom: 100px; }
 .topbar { height: 72px; background: color-mix(in srgb, var(--bg) 92%, transparent); position: sticky; top: 0; z-index: 8; backdrop-filter: blur(18px); }
 .top-context { display: flex; align-items: center; gap: 16px; }
+.locale-control select { min-width: 112px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--ink); padding: 8px 28px 8px 10px; font-size: 10px; cursor: pointer; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .date-control { display: grid; gap: 1px; border: 0; border-right: 1px solid var(--line); padding: 0 18px 0 0; background: transparent; color: var(--ink); text-align: right; }
 .date-control span { color: var(--muted); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
 .date-control b { font-size: 10px; }
@@ -107,14 +109,22 @@ main { max-width: 1780px; padding-bottom: 100px; }
 :root[data-theme="light"] dialog { background: #fff; }
 :root[data-theme="light"] .chart line { stroke: #dfe4de; }
 :root[data-theme="light"] .demo { background: #fff7e8; }
+[dir="rtl"] .sidebar { left: auto; right: 0; }
+[dir="rtl"] main { direction: rtl; margin-left: 0; margin-right: var(--sidebar); }
+[dir="rtl"] .sidebar nav button.active::before { left: auto; right: 0; }
+[dir="rtl"] .decision-row, [dir="rtl"] .result-row, [dir="rtl"] .venue-switch button { text-align: right; }
+[dir="rtl"] .decision-row i { transform: scaleX(-1); }
+[dir="rtl"] .date-control { border-right: 0; border-left: 1px solid var(--line); padding: 0 0 0 18px; text-align: left; }
 
 @media (max-width: 1180px) {
   .control-strip { grid-template-columns: 1fr 1fr; }
   .owner-grid, .business-analysis { grid-template-columns: 1fr; }
 }
 @media (max-width: 760px) {
+  [dir="rtl"] main { margin-right: 0; }
   .top-context { gap: 8px; }
   .date-control { display: none; }
+  .locale-control select { min-width: 94px; max-width: 108px; }
   .owner-head { align-items: flex-start; padding-top: 28px; }
   .owner-head .health { display: none; }
   .control-strip { grid-template-columns: 1fr 1fr; }
