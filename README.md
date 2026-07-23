@@ -13,7 +13,7 @@ Open `http://localhost:3000`.
 
 ## Current scope
 
-- Owner Command Center demonstration for VELVET TH.
+- Venue-agnostic Owner Command Center demonstration with configurable pilot identity.
 - Profit Autopilot with contribution economics, close forecasting, and ranked recoverable opportunities.
 - Executive revenue velocity, channel mix, and per-guest performance intelligence.
 - Interactive owner approvals and an explainable VenueGuard command interface in demo mode.

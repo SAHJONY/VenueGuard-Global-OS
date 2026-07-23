@@ -94,7 +94,24 @@ test("commercial UI exposes platform plans and onboarding", async () => {
   assert.match(html, /data-view="platform"/);
   assert.match(script, /platform\.plans/);
   assert.match(script, /catalog\.onboarding/);
-  assert.match(script, /integrations\.integrations/);
+  assert.match(script, /readiness\.checks/);
+  assert.match(script, /\/api\/readiness/);
+  assert.match(script, /\/api\/auth\/session/);
+});
+
+test("every operator workspace and control has a navigable fail-closed path", async () => {
+  const [html, script, localServer] = await Promise.all([readFile(new URL("../public/index.html", import.meta.url), "utf8"), readFile(new URL("../public/app.js", import.meta.url), "utf8"), readFile(new URL("../apps/owner-command-center/server.js", import.meta.url), "utf8")]);
+  for (const view of ["overview", "growth", "cash", "inventory", "trace", "supply", "workforce", "tickets", "artists", "risk", "platform"]) {
+    assert.match(html, new RegExp(`data-view="${view}"`));
+    assert.match(script, new RegExp(`"${view}"`));
+  }
+  const combined = `${html}\n${script}`;
+  for (const action of ["venue", "help", "account", "search", "notifications", "command", "readiness", "profit-help", "execute", "export", "sell", "contract", "subscribe"]) {
+    assert.ok(combined.includes(`data-action="${action}"`) || combined.includes(`action==="${action}"`), `missing ${action} control`);
+  }
+  assert.doesNotMatch(combined, /All systems operational|Approved in demo/);
+  assert.match(script, /No money, inventory, payroll, ticket, contract, or personnel change has been executed/);
+  for (const endpoint of ["brain", "catalog", "integrations", "platform", "readiness", "risk", "supply", "trace", "auth/session"]) assert.match(localServer, new RegExp(`/api/${endpoint}`));
 });
 
 test("platform API advertises global venues, portals and safe readiness", () => {
@@ -107,7 +124,7 @@ test("platform API advertises global venues, portals and safe readiness", () => 
 
 test("ecosystem API exposes every core operating domain", () => {
   const payload = invoke(ecosystem).payload;
-  assert.equal(payload.venue.name, "VELVET TH");
+  assert.equal(payload.venue.name, "Demo Venue");
   assert.equal(payload.modules.length, 6);
   assert.ok(payload.cashflow.length >= 6);
   assert.ok(payload.inventory.every(item => "variance" in item));

@@ -1,3 +1,12 @@
+const venue = Object.freeze({
+  id: process.env.PILOT_VENUE_ID || "demo-venue",
+  name: process.env.PILOT_VENUE_NAME || "Demo Venue",
+  city: process.env.PILOT_VENUE_CITY || "Demo City",
+  country: process.env.PILOT_VENUE_COUNTRY || "US",
+  currency: process.env.PILOT_CURRENCY || "USD",
+  timezone: process.env.PILOT_VENUE_TIMEZONE || "UTC"
+});
+
 export const summary = Object.freeze({
   grossSales: 14820,
   refunds: 0,
@@ -16,7 +25,7 @@ export const events = Object.freeze([
 ]);
 
 export const ecosystem = Object.freeze({
-  venue: { name: "VELVET TH", city: "Chicago", currency: "USD", timezone: "America/Chicago" },
+  venue,
   network: { venues: 4, live: 3, monthlyRevenue: 684320, monthlyGrowthPct: 18.4 },
   economics: { revenue: 37080, variableCosts: 18842, contribution: 18238, marginPct: 49.2, revenuePerGuest: 49.97 },
   forecast: { projectedClose: 42600, target: 40000, confidencePct: 91, current: 37080 },
@@ -59,7 +68,7 @@ export const ecosystem = Object.freeze({
     { employee: "Luis A.", role: "Server", sales: 2310, tips: 381, due: 381 },
     { employee: "Nina K.", role: "VIP host", sales: 4190, tips: 612, due: 712 }
   ],
-  ticketing: { event: "Velvet Saturdays", capacity: 900, sold: 742, checkedIn: 418, reservations: 36, revenue: 22260 },
+  ticketing: { event: "Saturday Showcase", capacity: 900, sold: 742, checkedIn: 418, reservations: 36, revenue: 22260 },
   artists: [
     { artist: "Nova Rey", date: "2026-08-08", tariff: 8500, contract: "awaiting signature", settlement: "not funded" },
     { artist: "DJ Sol", date: "2026-08-15", tariff: 4200, contract: "approved", settlement: "deposit secured" },
@@ -84,9 +93,9 @@ export const ecosystem = Object.freeze({
 export const globalCatalog = Object.freeze({
   locales: [{ id: "en-US", label: "English" }, { id: "es-US", label: "Español" }],
   venues: [
-    { id: "velvet-th", name: "VELVET TH", type: "NIGHTCLUB", city: "Chicago", country: "US", currency: "USD", timezone: "America/Chicago", status: "LIVE" },
+    { ...venue, type: "NIGHTCLUB", status: "LIVE" },
     { id: "arena-demo", name: "Global Arena Demo", type: "ARENA", city: "Mexico City", country: "MX", currency: "MXN", timezone: "America/Mexico_City", status: "ONBOARDING" },
-    { id: "restaurant-demo", name: "Velvet Dining Demo", type: "RESTAURANT", city: "Madrid", country: "ES", currency: "EUR", timezone: "Europe/Madrid", status: "ONBOARDING" }
+    { id: "restaurant-demo", name: "Global Dining Demo", type: "RESTAURANT", city: "Madrid", country: "ES", currency: "EUR", timezone: "Europe/Madrid", status: "ONBOARDING" }
   ],
   onboarding: ["Business identity", "Owner verification", "Venue configuration", "Payments and bank", "Inventory import", "Staff invitations", "Go-live review"],
   translations: {

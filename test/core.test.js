@@ -9,8 +9,8 @@ test("tenant isolation blocks cross-tenant access", () => {
 });
 
 test("commercial tenants require identity and a valid subscription plan", () => {
-  const tenant = provisionTenant({ legalName: " Velvet TH LLC ", ownerId: "owner-1", plan: "GROWTH" });
-  assert.equal(tenant.legalName, "Velvet TH LLC");
+  const tenant = provisionTenant({ legalName: " Demo Venue LLC ", ownerId: "owner-1", plan: "GROWTH" });
+  assert.equal(tenant.legalName, "Demo Venue LLC");
   assert.equal(tenant.status, "TRIAL");
   assert.equal(SubscriptionPlan.GROWTH.venues, 5);
   assert.throws(() => provisionTenant({ legalName: "Bad", ownerId: "owner-1", plan: "UNKNOWN" }));

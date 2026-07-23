@@ -1,0 +1,34 @@
+.profile {
+  border: 0;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  color: var(--ink);
+  cursor: pointer;
+}
+.profile > span:first-child { width: 31px; height: 31px; }
+.profile > .profile-details {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  display: grid;
+  place-items: initial;
+  background: transparent;
+  flex: 1;
+  text-align: left;
+}
+.health { color: var(--ink); text-align: left; cursor: pointer; }
+.dialog-title { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px; border-bottom: 1px solid var(--line); }
+.dialog-title small { color: var(--green); font-size: 8px; letter-spacing: .15em; }
+.dialog-title h2 { margin: 5px 0 0; font: 700 22px Manrope; }
+.dialog-title button { border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; }
+.dialog-content, .search-results { padding: 18px; display: grid; gap: 9px; }
+.dialog-summary, .dialog-note, .workflow-state p, .empty-state { color: #aab3ac; font-size: 11px; line-height: 1.6; margin: 0; }
+.dialog-note { border-top: 1px solid var(--line); padding-top: 12px; }
+.gate-list { display: grid; gap: 7px; }
+.gate-list > div, .workflow-state { display: flex; justify-content: space-between; gap: 15px; background: var(--panel); border: 1px solid var(--line); padding: 12px; border-radius: 7px; font-size: 10px; }
+.workflow-state { display: block; }
+.implemented { color: var(--green); }
+.pending { color: var(--amber); }
+.result-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; width: 100%; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 13px; border-radius: 7px; text-align: left; cursor: pointer; }
+.result-row:hover, .result-row:focus-visible { border-color: #51634f; background: var(--panel2); }
+.result-row small { color: var(--muted); }

@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeVenueEvent, productionReadiness, reconcileVenueBatch, signVenuePayload, verifyVenueSignature } from "../packages/core/src/index.js";
+import { normalizeVenueEvent, productionReadiness, reconcileVenueBatch, signVenuePayload, verifyJwksConnectivity, verifyOidcToken, verifyVenueSignature } from "../packages/core/src/index.js";
 import readiness from "../api/integrations.js";
 import ingest from "../api/ingest.js";
 import { readFile } from "node:fs/promises";
+import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from "jose";
 
 function responseRecorder() {
   const result = { statusCode: 200, payload: null };
@@ -39,15 +40,59 @@ test("production readiness is redacted and fails closed", () => {
   assert.ok(blocked.blockerCount > 0);
   const migrationOnly = productionReadiness({ DATABASE_URL: "set" });
   assert.equal(migrationOnly.checks.database.ready, false);
-  const ready = productionReadiness({ VENUEGUARD_DATABASE_URL: "set", AUTH_ISSUER: "set", AUTH_AUDIENCE: "set", AUTH_JWKS_URL: "set", AUTH_MFA_ENFORCED: "true", POS_WEBHOOK_SECRET: "set", PILOT_TENANT_ID: "set", PILOT_VENUE_ID: "set", DATABASE_INGEST_URL: "set", DATABASE_INGEST_TOKEN: "set", SENTRY_DSN: "set", HEALTHCHECK_TOKEN: "set", DATABASE_BACKUP_POLICY: "daily", DATABASE_RESTORE_TESTED_AT: "2026-07-22" });
+  const ready = productionReadiness({ VENUEGUARD_DATABASE_URL: "set", AUTH_ISSUER: "set", AUTH_AUDIENCE: "set", AUTH_JWKS_URL: "set", AUTH_JWT_ALGORITHMS: "RS256", AUTH_MFA_ENFORCED: "true", POS_WEBHOOK_SECRET: "set", PILOT_TENANT_ID: "set", PILOT_VENUE_ID: "set", DATABASE_INGEST_URL: "set", DATABASE_INGEST_TOKEN: "set", SENTRY_DSN: "set", HEALTHCHECK_TOKEN: "set", DATABASE_BACKUP_POLICY: "daily", DATABASE_RESTORE_TESTED_AT: "2026-07-22" });
   assert.equal(ready.mode, "PILOT_READY");
 });
 
-test("readiness API uses service unavailable while critical gates are blocked", () => {
+test("readiness API uses service unavailable while critical gates are blocked", async () => {
   const { result, response } = responseRecorder();
-  readiness({ method: "GET", query: { view: "readiness" } }, response);
+  await readiness({ method: "GET", query: { view: "readiness" } }, response);
   assert.equal(result.statusCode, 503);
   assert.equal(result.payload.secretsExposed, false);
+});
+
+test("OIDC verifies signatures and claims while requiring MFA", async () => {
+  const { publicKey, privateKey } = await generateKeyPair("RS256");
+  const publicJwk = { ...await exportJWK(publicKey), kid: "test-key", alg: "RS256", use: "sig" };
+  const jwks = createLocalJWKSet({ keys: [publicJwk] });
+  const environment = {
+    AUTH_ISSUER: "https://identity.example.com/",
+    AUTH_AUDIENCE: "venueguard-api",
+    AUTH_JWKS_URL: "https://identity.example.com/.well-known/jwks.json",
+    AUTH_JWT_ALGORITHMS: "RS256",
+    AUTH_MFA_ENFORCED: "true"
+  };
+  const issue = (claims, issuer = environment.AUTH_ISSUER) => new SignJWT({ tenant_id: "tenant-1", venue_id: "venue-1", role: "OWNER", ...claims })
+    .setProtectedHeader({ alg: "RS256", kid: "test-key" })
+    .setSubject("owner-1")
+    .setIssuer(issuer)
+    .setAudience(environment.AUTH_AUDIENCE)
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(privateKey);
+
+  const session = await verifyOidcToken({ token: await issue({ amr: ["pwd", "mfa"] }), environment, jwks });
+  assert.deepEqual({ tenantId: session.tenantId, venueId: session.venueId, role: session.role, mfaVerified: session.mfaVerified }, { tenantId: "tenant-1", venueId: "venue-1", role: "OWNER", mfaVerified: true });
+  const passwordOnlyToken = await issue({ amr: ["pwd"] });
+  await assert.rejects(() => verifyOidcToken({ token: passwordOnlyToken, environment, jwks }), /MFA_REQUIRED/);
+  const wrongIssuerToken = await issue({ amr: ["mfa"] }, "https://attacker.example/");
+  await assert.rejects(() => verifyOidcToken({ token: wrongIssuerToken, environment, jwks }));
+  const expiredToken = await new SignJWT({ tenant_id: "tenant-1", venue_id: "venue-1", role: "OWNER", amr: ["mfa"] })
+    .setProtectedHeader({ alg: "RS256", kid: "test-key" })
+    .setSubject("owner-1")
+    .setIssuer(environment.AUTH_ISSUER)
+    .setAudience(environment.AUTH_AUDIENCE)
+    .setIssuedAt(1)
+    .setExpirationTime(2)
+    .sign(privateKey);
+  await assert.rejects(() => verifyOidcToken({ token: expiredToken, environment, jwks }));
+});
+
+test("readiness verifies a usable HTTPS JWKS document", async () => {
+  const environment = { AUTH_ISSUER: "https://identity.example.com/", AUTH_AUDIENCE: "venueguard-api", AUTH_JWKS_URL: "https://identity.example.com/jwks", AUTH_JWT_ALGORITHMS: "RS256" };
+  const fetch = async () => ({ ok: true, json: async () => ({ keys: [{ kid: "key-1", kty: "RSA" }] }) });
+  assert.equal(await verifyJwksConnectivity(environment, { fetch }), true);
+  assert.equal(await verifyJwksConnectivity({ ...environment, AUTH_JWKS_URL: "http://identity.example.com/jwks" }, { fetch }), false);
 });
 
 test("ingestion API rejects writes while durable configuration is absent", async () => {

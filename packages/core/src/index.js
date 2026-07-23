@@ -15,3 +15,4 @@ export { runBrain } from "./ai-engine.js";
 export { calculateEventEconomics, prioritizeOpportunities, projectClose } from "./profitability.js";
 export { signVenuePayload, verifyVenueSignature, normalizeVenueEvent, reconcileVenueBatch } from "./ingestion.js";
 export { productionReadiness } from "./readiness.js";
+export { bearerToken, verifyJwksConnectivity, verifyOidcRequest, verifyOidcToken } from "./auth.js";
