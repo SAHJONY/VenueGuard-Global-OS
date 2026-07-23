@@ -107,7 +107,7 @@ test("platform API advertises global venues, portals and safe readiness", () => 
 
 test("ecosystem API exposes every core operating domain", () => {
   const payload = invoke(ecosystem).payload;
-  assert.equal(payload.venue.name, "VELVET TH");
+  assert.equal(payload.venue.name, "Demo Venue");
   assert.equal(payload.modules.length, 6);
   assert.ok(payload.cashflow.length >= 6);
   assert.ok(payload.inventory.every(item => "variance" in item));

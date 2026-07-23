@@ -7,8 +7,8 @@ import { ecosystem } from "../../api/_demo-data.js";
 
 const publicDir = fileURLToPath(new URL("../../public", import.meta.url));
 const ledger = new OperationalLedger();
-const tenantId = "tenant_velvet_th";
-const venueId = "venue_velvet_th_01";
+const tenantId = process.env.PILOT_TENANT_ID || "tenant_demo";
+const venueId = process.env.PILOT_VENUE_ID || "venue_demo";
 
 seed();
 
